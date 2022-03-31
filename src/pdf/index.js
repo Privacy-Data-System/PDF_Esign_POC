@@ -1,18 +1,21 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import "./pdf.css";
-// import { pdfjsLib, jspdf, PDFJSLib } from "pdfjs-dist";
-// import { fabric } from "fabric";
 import sample from "./sample.pdf";
+import { Buffer } from "buffer";
+
 function Annotation() {
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
   let fabric = window.fabric;
-  console.log(this, "this");
-  console.log(fabric, "fabric");
+
+  const location = useLocation();
+
+  const { state: pdfUrl } = location || {};
+
   //Fabric Arrow Script //
   fabric.LineArrow = fabric.util.createClass(fabric.Line, {
     type: "lineArrow",
-
     initialize: function (element, options) {
       options || (options = {});
       this.callSuper("initialize", element, options);
@@ -150,7 +153,7 @@ function Annotation() {
     return Arrow;
   })();
 
-  var PDFAnnotate = function (container_id, url, options = {}) {
+  var PDFAnnotate = function (container_id,  options = {}) {
     this.number_of_pages = 0;
     this.pages_rendered = 0;
     this.active_tool = 1; // 1 - Free hand, 2 - Text, 3 - Arrow, 4 - Rectangle
@@ -162,14 +165,13 @@ function Annotation() {
     this.font_size = 16;
     this.active_canvas = 0;
     this.container_id = container_id;
-    this.url = url;
     this.pageImageCompression = options.pageImageCompression
       ? options.pageImageCompression.toUpperCase()
       : "NONE";
     var inst = this;
 
-    // console.log(url, "url");
-    var loadingTask = window.pdfjsLib.getDocument(this.url);
+    var loadingTask = window.pdfjsLib.getDocument({ data: pdfUrl });
+
     loadingTask.promise.then(
       function (pdf) {
         var scale = options.scale ? options.scale : 1.3;
@@ -525,16 +527,18 @@ function Annotation() {
     });
   };
 
-  var pdf = new PDFAnnotate("pdf-container", sample, {
-    onPageUpdated(page, oldData, newData) {
-      console.log(page, oldData, newData);
-    },
-    ready() {
-      console.log("Plugin initialized successfully");
-    },
-    scale: 1.5,
-    pageImageCompression: "MEDIUM", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
-  });
+  var pdf =
+    pdfUrl &&
+    new PDFAnnotate("pdf-container",  {
+      onPageUpdated(page, oldData, newData) {
+        console.log(page, oldData, newData);
+      },
+      ready() {
+        console.log("Plugin initialized successfully");
+      },
+      scale: 1.5,
+      pageImageCompression: "MEDIUM", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+    });
 
   function changeActiveTool(event) {
     // console.log(event.currentTarget.parentNode, "event");
@@ -593,7 +597,10 @@ function Annotation() {
 
   function savePDF() {
     // pdf.savePdf();
-    pdf.savePdf(sample); // save with given file name
+
+    let b64 = new Buffer.from(pdfUrl).toString("base64");
+    console.log(b64, "b64");
+    pdf.savePdf(b64); // save with given file name
   }
 
   function clearPage() {
