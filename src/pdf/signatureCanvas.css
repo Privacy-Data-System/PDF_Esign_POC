@@ -1,0 +1,6 @@
+.signatureCanvas {
+  border: 1px solid black;
+  width: 25vw;
+  min-height: 500px;
+  background-color: white;
+}

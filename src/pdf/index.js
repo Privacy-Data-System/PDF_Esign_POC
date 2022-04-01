@@ -1,11 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import Popup from "reactjs-popup";
+import SignaturePad from "react-signature-canvas";
+import { useSpring, animated } from "@react-spring/web";
+import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react";
+import styles from "./style.module.css";
 import "./pdf.css";
+import "./signatureCanvas.css";
 // import { pdfjsLib, jspdf, PDFJSLib } from "pdfjs-dist";
 // import { fabric } from "fabric";
 import sample from "./sample.pdf";
+const useGesture = createUseGesture([dragAction, pinchAction]);
+
 function Annotation() {
-  const [file, setFile] = useState();
-  const [pencilTool, setPencilTool] = useState();
+  // const [file, setFile] = useState();
+  // const [pencilTool, setPencilTool] = useState();
+  const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
+  const sigCanvas = useRef({});
+  // console.log(imageURL?.toString(), "imageYrl");
+  useEffect(() => {
+    const handler = (e) => e.preventDefault();
+    document.addEventListener("gesturestart", handler);
+    document.addEventListener("gesturechange", handler);
+    document.addEventListener("gestureend", handler);
+    return () => {
+      document.removeEventListener("gesturestart", handler);
+      document.removeEventListener("gesturechange", handler);
+      document.removeEventListener("gestureend", handler);
+    };
+  }, []);
+  const [style, api] = useSpring(() => ({
+    x: 0,
+    y: 0,
+    scale: 1,
+    rotateZ: 0,
+  }));
+  const ref = useRef(null);
+  useGesture(
+    {
+      // onHover: ({ active, event }) => console.log('hover', event, active),
+      // onMove: ({ event }) => console.log('move', event),
+      onDrag: ({ pinching, cancel, offset: [x, y], ...rest }) => {
+        if (pinching) return cancel();
+        api.start({ x, y });
+      },
+      onPinch: ({
+        origin: [ox, oy],
+        first,
+        movement: [ms],
+        offset: [s, a],
+        memo,
+      }) => {
+        if (first) {
+          const { width, height, x, y } = ref.current.getBoundingClientRect();
+          const tx = ox - (x + width / 2);
+          const ty = oy - (y + height / 2);
+          memo = [style.x.get(), style.y.get(), tx, ty];
+        }
+
+        const x = memo[0] - (ms - 1) * memo[2];
+        const y = memo[1] - (ms - 1) * memo[3];
+        api.start({ scale: s, rotateZ: a, x, y });
+        return memo;
+      },
+    },
+    {
+      target: ref,
+      drag: { from: () => [style.x.get(), style.y.get()] },
+      pinch: { scaleBounds: { min: 0.5, max: 2 }, rubberband: true },
+    }
+  );
+  const clear = () => sigCanvas.current.clear();
+
+  //
   let fabric = window.fabric;
   console.log(this, "this");
   console.log(fabric, "fabric");
@@ -239,7 +305,7 @@ function Annotation() {
             );
           });
         }
-        console.log(fabricObj, "  fabricObj.renderAll");
+
         fabricObj.setBackgroundImage(
           background,
           fabricObj.renderAll.bind(fabricObj)
@@ -269,7 +335,7 @@ function Annotation() {
         }
       });
     };
-    console.log(inst, "inst");
+
     inst.fabricClickHandler = function (event, fabricObj) {
       // var inst = inst;cl
       // console.log(inst.active_tool, "fabric in click handler");
@@ -357,7 +423,7 @@ function Annotation() {
 
   PDFAnnotate.prototype.enableAddArrow = function () {
     var inst = this;
-    console.log(inst.active_tool, "inst active tool in ");
+
     inst.active_tool = 3;
     if (inst.fabricObjects.length > 0) {
       // $.each(inst.fabricObjects, function (index, fabricObj) {
@@ -369,13 +435,65 @@ function Annotation() {
 
       inst.fabricObjects.forEach((fabricObj) => {
         fabricObj.isDrawingMode = false;
-        console.log(Arrow, "Arrow");
+
         new Arrow(fabricObj, inst.color, function () {
-          console.log("In out");
           inst.active_tool = 0;
         });
       });
     }
+  };
+
+  PDFAnnotate.prototype.addSignToCanvas = function (imageURL) {
+    var inst = this;
+    var fabricObj = inst.fabricObjects[inst.active_canvas];
+    console.log(imageURL, "imageURL va");
+    if (fabricObj) {
+      var inputElement = document.createElement("input");
+      // inputElement.type = "file";
+      // inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
+      // inputElement.onchange = function () {
+      //   var reader = new FileReader();
+      //   reader.addEventListener(
+      //     "load",
+      //     function () {
+      //       inputElement.remove();
+      //       var image = new Image();
+      //       console.log(image, "image");
+      //       image.onload = function () {
+      //         fabricObj?.add(new fabric.Image(image));
+      //       };
+      //       image.src = this.result;
+      //     },
+      //     false
+      //   );
+      //   reader.readAsDataURL(inputElement.files[0]);
+      // };
+      var reader = new FileReader();
+      reader.addEventListener(
+        "load",
+        function () {
+          // inputElement.remove();
+          var image = imageURL;
+          console.log(image, "image");
+          image.onload = function () {
+            fabricObj?.add(new fabric.Image(image));
+          };
+          // image.src = this.result;
+          image.src =
+            "https://www.morebusiness.com/wp-content/uploads/2020/09/handwritten-email-signature.jpg.webp";
+        },
+        false
+      );
+      reader.readAsDataURL(imageURL);
+      console.log(inputElement, "inputElement");
+      document.getElementsByTagName("body")[0].appendChild(inputElement);
+      inputElement.click();
+    }
+  };
+  const save = () => {
+    setImageURL(sigCanvas.current.getTrimmedCanvas().toDataURL("image/png"));
+    // console.log(imageURL.length, "imageURL.length va");
+    imageURL.length > 0 && pdf.addSignToCanvas(imageURL);
   };
 
   PDFAnnotate.prototype.addImageToCanvas = function () {
@@ -393,6 +511,7 @@ function Annotation() {
           function () {
             inputElement.remove();
             var image = new Image();
+            // console.log(image, "image");
             image.onload = function () {
               fabricObj?.add(new fabric.Image(image));
             };
@@ -400,6 +519,7 @@ function Annotation() {
           },
           false
         );
+        // console.log(inputElement.files, "inputElement.files");
         reader.readAsDataURL(inputElement.files[0]);
       };
       document.getElementsByTagName("body")[0].appendChild(inputElement);
@@ -411,11 +531,7 @@ function Annotation() {
     var inst = this;
     var activeObject =
       inst.fabricObjects[inst.active_canvas]?.getActiveObject();
-    console.log(activeObject, "activeObject");
-    console.log(
-      inst.fabricObjects[inst.active_canvas].remove(activeObject),
-      "inst.fabricObjects"
-    );
+
     if (activeObject) {
       if (alert("Are you sure ?")) {
         return inst.fabricObjects[inst.active_canvas].remove(activeObject);
@@ -460,7 +576,7 @@ function Annotation() {
     //   fabricObj.freeDrawingBrush.width = size;
     // });
     inst.fabricObjects.forEach((fabricObj) => {
-      console.log(fabricObj.freeDrawingBrush, "fabricObj.freeDrawingBrush");
+      // console.log(fabricObj.freeDrawingBrush, "fabricObj.freeDrawingBrush");
       fabricObj.freeDrawingBrush.width = size;
     });
   };
@@ -494,9 +610,9 @@ function Annotation() {
     var fabricObj = inst.fabricObjects[inst.active_canvas];
     // console.log(fabricObj.clear(), "fabricObj");
     var bg = fabricObj.backgroundImage;
-    console.log(bg, "bg");
+    // console.log(bg, "bg");
     if (window.confirm("Are you sure?")) {
-      console.log("In out clear");
+      // console.log("In out clear");
       fabricObj.clear();
       fabricObj.setBackgroundImage(bg, fabricObj.renderAll.bind(fabricObj));
     }
@@ -577,6 +693,10 @@ function Annotation() {
     event?.preventDefault();
     pdf.addImageToCanvas();
   }
+  function addSign(event) {
+    event?.preventDefault();
+    pdf.addSignToCanvas();
+  }
 
   function enableRectangle(event) {
     event?.preventDefault();
@@ -610,25 +730,35 @@ function Annotation() {
   //   var width = this.val();
   //   pdf.setBrushSize(width);
   // });
+  // console.log(inst);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // document.getElementByClassName("color-tool").click(function () {
-    //   $(".color-tool.active").classList.remove("active");
-    //   this.classList.add("active");
-    //   color = this.get(0).style.backgroundColor;
-    //   pdf.setColor(color);
-    // });
+  // function myFunction() {
+  //   var x = document.getElementById("brush-size").value;
+  // }
+  // document.addEventListener("DOMContentLoaded", () => {
+  //   // document.getElementByClassName("color-tool").click(function () {
+  //   //   $(".color-tool.active").classList.remove("active");
+  //   //   this.classList.add("active");
+  //   //   color = this.get(0).style.backgroundColor;
+  //   //   pdf.setColor(color);
+  //   // });
+  //   console.log("hi in eve");
+  //   document.getElementById(".brush-size").change(function () {
+  //     console.log(window.value, "this in doc");
+  //     let width = this.value;
+  //     pdf.setBrushSize(width);
+  //   });
 
-    document.getElementById("brush-size").change(function () {
-      let width = this.value;
-      pdf.setBrushSize(width);
-    });
-
-    document.getElementById("font-size").change(function () {
-      let font_size = this.value;
-      pdf.setFontSize(font_size);
-    });
-  });
+  // document.querySelector("input").addEventListener("change", function () {
+  //   let width = document.querySelector(this.val());
+  //   // let width = window.val();
+  //   pdf.setBrushSize(width);
+  // });
+  // document.getElementById("font-size").change(function () {
+  //   let font_size = this.value;
+  //   pdf.setFontSize(font_size);
+  // });
+  // });
 
   return (
     <>
@@ -639,16 +769,14 @@ function Annotation() {
             <span>PDFJS + FabricJS + jsPDF</span>
           </div>
           <div className="tool">
-            <label htmlFor="brush-size">Brush size</label>
+            <label>Brush size</label>
             <input
               type="number"
               className="form-control text-right"
               value="1"
               id="brush-size"
               max="50"
-              onChange={(e) => {
-                setFile(e);
-              }}
+              onchange="myFunction()"
             />
           </div>
           <div className="tool">
@@ -757,6 +885,17 @@ function Annotation() {
             </button>
           </div>
           <div className="tool">
+            <button className="tool-button">
+              <i
+                className="fa fa-square-o"
+                title="Sign"
+                onClick={(e) => {
+                  addSign(e);
+                }}
+              ></i>
+            </button>
+          </div>
+          <div className="tool">
             <button
               className="btn btn-danger btn-sm"
               onClick={(e) => {
@@ -776,6 +915,60 @@ function Annotation() {
               Clear Page
             </button>
           </div>
+          <div>
+            <Popup
+              modal
+              trigger={<button>Open Signature Pad</button>}
+              closeOnDocumentClick={false}
+            >
+              {(close) => (
+                <>
+                  <SignaturePad
+                    ref={sigCanvas}
+                    canvasProps={{
+                      className: "signatureCanvas",
+                      backgroundColor: "white",
+                    }}
+                  />
+                  {/* Button to trigger save canvas image */}
+                  <button onClick={save}>Save</button>
+                  <button onClick={clear}>Clear</button>
+                  <button onClick={close}>Close</button>
+                </>
+              )}
+            </Popup>
+            <br />
+            <br />
+            <div>
+              <animated.div className={styles.card} ref={ref} style={style}>
+                {/* <img
+                  src={imageURL}
+                  alt="my signature"
+                  style={{
+                    display: "block",
+                    margin: "0 auto",
+                    border: "1px solid black",
+                    width: "300px",
+                    backgroundColor: "white",
+                  }}
+                /> */}
+              </animated.div>
+            </div>
+            {/* {imageURL ? (
+              <img
+                src={imageURL}
+                alt="my signature"
+                style={{
+                  display: "block",
+                  margin: "0 auto",
+                  border: "1px solid black",
+                  width: "300px",
+                  backgroundColor: "white",
+                }}
+              />
+            ) : null} */}
+          </div>
+
           <div className="tool">
             <button className="btn btn-info btn-sm">{}</button>
           </div>
@@ -790,6 +983,7 @@ function Annotation() {
             </button>
           </div>
         </div>
+
         <div id="pdf-container"></div>
         <div
           className="modal fade"

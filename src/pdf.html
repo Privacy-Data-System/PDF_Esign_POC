@@ -659,6 +659,9 @@
               },
               false
             );
+            console.log(inputElement.files[0], "inputElement.files");
+            console.log(inputElement, "inputElement");
+
             reader.readAsDataURL(inputElement.files[0]);
           };
           document.getElementsByTagName("body")[0].appendChild(inputElement);
@@ -853,9 +856,10 @@
           color = $(this).get(0).style.backgroundColor;
           pdf.setColor(color);
         });
-
         $("#brush-size").change(function () {
+          console.log($(this).val(), "this ie ths", this);
           var width = $(this).val();
+          console.log(width, "width");
           pdf.setBrushSize(width);
         });
 
