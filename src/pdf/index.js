@@ -4,6 +4,7 @@ import "./pdf.css";
 import sample from "./sample.pdf";
 import { Buffer } from "buffer";
 
+
 function Annotation() {
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
@@ -153,7 +154,8 @@ function Annotation() {
     return Arrow;
   })();
 
-  var PDFAnnotate = function (container_id,  options = {}) {
+  let PDFAnnotate = function (container_id,  options = {}) {
+    console.count('count PDF annote function')
     this.number_of_pages = 0;
     this.pages_rendered = 0;
     this.active_tool = 1; // 1 - Free hand, 2 - Text, 3 - Arrow, 4 - Rectangle
@@ -170,10 +172,12 @@ function Annotation() {
       : "NONE";
     var inst = this;
 
+    // var loadingTask = window.pdfjsLib.getDocument(sample);
     var loadingTask = window.pdfjsLib.getDocument({ data: pdfUrl });
 
     loadingTask.promise.then(
       function (pdf) {
+        console.log(pdf, 'pdf');
         var scale = options.scale ? options.scale : 1.3;
         inst.number_of_pages = pdf.numPages;
 
@@ -195,15 +199,17 @@ function Annotation() {
             var renderTask = page.render(renderContext);
 
             renderTask.promise.then(function () {
-              Array.from(document.getElementsByClassName("pdf-canvas")).forEach(
-                function (el, index) {
-                  // console.log(el, "el", index);
-                  el.setAttribute("id", "page-" + (index + 1) + "-canvas");
+              Array.from(document.getElementsByClassName("pdf-canvas")).forEach( function (el, ind) 
+                 {
+                  el.setAttribute("id", "page-" + (ind + 1) + "-canvas");
                 }
               );
               inst.pages_rendered++;
-              if (inst.pages_rendered == inst.number_of_pages)
+              if (inst.pages_rendered == inst.number_of_pages){
+
                 inst.initFabric();
+
+              }
             });
           });
         }
@@ -214,6 +220,7 @@ function Annotation() {
     );
 
     this.initFabric = function () {
+      console.count('Fabric initialize count')
       var inst = this;
       let canvases = "#" + inst.container_id + " canvas";
       Array.from(document.querySelectorAll(canvases)).forEach(function (
@@ -527,9 +534,7 @@ function Annotation() {
     });
   };
 
-  var pdf =
-    pdfUrl &&
-    new PDFAnnotate("pdf-container",  {
+  let pdf = new PDFAnnotate("pdf-container",  {
       onPageUpdated(page, oldData, newData) {
         console.log(page, oldData, newData);
       },
@@ -537,8 +542,10 @@ function Annotation() {
         console.log("Plugin initialized successfully");
       },
       scale: 1.5,
-      pageImageCompression: "MEDIUM", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
+  
+    console.log(pdf, 'pdfco')
 
   function changeActiveTool(event) {
     // console.log(event.currentTarget.parentNode, "event");
@@ -639,7 +646,7 @@ function Annotation() {
 
   return (
     <>
-      {/* {/ <div>React PDF</div> /} */}
+      {console.count("render count")}
       <div className="body">
         <div className="toolbar">
           <div className="tool">
