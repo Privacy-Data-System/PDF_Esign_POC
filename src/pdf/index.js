@@ -478,9 +478,9 @@ function Annotation() {
           image.onload = function () {
             fabricObj?.add(new fabric.Image(image));
           };
-          // image.src = this.result;
-          image.src =
-            "https://www.morebusiness.com/wp-content/uploads/2020/09/handwritten-email-signature.jpg.webp";
+          image.src = imageURL;
+          // image.src =
+          //   "https://www.morebusiness.com/wp-content/uploads/2020/09/handwritten-email-signature.jpg.webp";
         },
         false
       );
