@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import "./pdf.css";
 import sample from "./sample.pdf";
+import SignaturePad from "react-signature-canvas";
+import Popup from "reactjs-popup";
 import { Buffer } from "buffer";
-
+import "./sigCanvas.css";
 
 function Annotation() {
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
+  const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
+  const sigCanvas = useRef({});
+  console.log(imageURL, "img");
+  const fetchD = fetch(imageURL)
+    .then((data) => {
+      console.log(data.blob(), " data");
+      return data.blob();
+    })
+    .then((res) => window.URL.createObjectURL(new Blob([res])));
+  console.log(fetchD, "fetchD");
   let fabric = window.fabric;
+  const clear = () => sigCanvas.current.clear();
 
   const location = useLocation();
 
@@ -154,8 +167,8 @@ function Annotation() {
     return Arrow;
   })();
 
-  let PDFAnnotate = function (container_id,  options = {}) {
-    console.count('count PDF annote function')
+  let PDFAnnotate = function (container_id, options = {}) {
+    console.count("count PDF annote function");
     this.number_of_pages = 0;
     this.pages_rendered = 0;
     this.active_tool = 1; // 1 - Free hand, 2 - Text, 3 - Arrow, 4 - Rectangle
@@ -177,7 +190,7 @@ function Annotation() {
 
     loadingTask.promise.then(
       function (pdf) {
-        console.log(pdf, 'pdf');
+        console.log(pdf, "pdf");
         var scale = options.scale ? options.scale : 1.3;
         inst.number_of_pages = pdf.numPages;
 
@@ -199,16 +212,14 @@ function Annotation() {
             var renderTask = page.render(renderContext);
 
             renderTask.promise.then(function () {
-              Array.from(document.getElementsByClassName("pdf-canvas")).forEach( function (el, ind) 
-                 {
+              Array.from(document.getElementsByClassName("pdf-canvas")).forEach(
+                function (el, ind) {
                   el.setAttribute("id", "page-" + (ind + 1) + "-canvas");
                 }
               );
               inst.pages_rendered++;
-              if (inst.pages_rendered == inst.number_of_pages){
-
+              if (inst.pages_rendered == inst.number_of_pages) {
                 inst.initFabric();
-
               }
             });
           });
@@ -220,7 +231,7 @@ function Annotation() {
     );
 
     this.initFabric = function () {
-      console.count('Fabric initialize count')
+      console.count("Fabric initialize count");
       var inst = this;
       let canvases = "#" + inst.container_id + " canvas";
       Array.from(document.querySelectorAll(canvases)).forEach(function (
@@ -248,7 +259,6 @@ function Annotation() {
             );
           });
         }
-        console.log(fabricObj, "  fabricObj.renderAll");
         fabricObj.setBackgroundImage(
           background,
           fabricObj.renderAll.bind(fabricObj)
@@ -400,20 +410,62 @@ function Annotation() {
         reader.addEventListener(
           "load",
           function () {
-            inputElement.remove();
+            // inputElement.remove();
             var image = new Image();
             image.onload = function () {
               fabricObj?.add(new fabric.Image(image));
             };
-            image.src = this.result;
+            image.src = imageURL;
           },
           false
         );
         reader.readAsDataURL(inputElement.files[0]);
+        console.log(
+          reader.readAsDataURL(inputElement.files[0]),
+          "inputElement.files"
+        );
       };
       document.getElementsByTagName("body")[0].appendChild(inputElement);
       inputElement.click();
     }
+  };
+  PDFAnnotate.prototype.addSignToCanvas = function () {
+    console.log("in out");
+    var inst = this;
+    var fabricObj = inst.fabricObjects[inst.active_canvas];
+
+    if (fabricObj) {
+      var inputElement = document.getElementById("close");
+      // inputElement.type = "file";
+      // inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
+      inputElement.onchange = function () {
+        var reader = new FileReader();
+        reader.addEventListener(
+          "load",
+          function () {
+            // inputElement.remove();
+            var image = imageURL;
+            image.onload = function () {
+              fabricObj?.add(new fabric.Image(image));
+            };
+            image.src = imageURL;
+          },
+          false
+        );
+        reader.readAsDataURL(imageURL);
+        console.log(
+          reader.readAsDataURL(inputElement.files[0]),
+          "inputElement.files"
+        );
+      };
+      document.getElementsByTagName("body")[0].appendChild(inputElement);
+      inputElement.click();
+      // inputElement.click();
+    }
+  };
+  const save = () => {
+    setImageURL(sigCanvas.current.getTrimmedCanvas().toDataURL("image/png"));
+    // imageURL.length > 0 && pdf.addSignToCanvas();
   };
 
   PDFAnnotate.prototype.deleteSelectedObject = function () {
@@ -534,18 +586,18 @@ function Annotation() {
     });
   };
 
-  let pdf = new PDFAnnotate("pdf-container",  {
-      onPageUpdated(page, oldData, newData) {
-        console.log(page, oldData, newData);
-      },
-      ready() {
-        console.log("Plugin initialized successfully");
-      },
-      scale: 1.5,
-      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
-    });
-  
-    console.log(pdf, 'pdfco')
+  let pdf = new PDFAnnotate("pdf-container", {
+    onPageUpdated(page, oldData, newData) {
+      console.log(page, oldData, newData);
+    },
+    ready() {
+      console.log("Plugin initialized successfully");
+    },
+    scale: 1.5,
+    pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+  });
+
+  console.log(pdf, "pdfco");
 
   function changeActiveTool(event) {
     // console.log(event.currentTarget.parentNode, "event");
@@ -804,6 +856,48 @@ function Annotation() {
             </button>
           </div>
         </div>
+        <h1>Signature Pad Example</h1>
+        <Popup
+          modal
+          trigger={<button>Open Signature Pad</button>}
+          closeOnDocumentClick={false}
+        >
+          {(close) => (
+            <>
+              <SignaturePad
+                ref={sigCanvas}
+                canvasProps={{
+                  className: "signatureCanvas",
+                }}
+              />
+              {/* Button to trigger save canvas image */}
+              <button onClick={save}>Save</button>
+              <button onClick={clear}>Clear</button>
+              <input type="button" id="close" onClick={close}>
+                close
+              </input>
+              {/* <button id="close" onClick={close}>
+                Close
+              </button> */}
+            </>
+          )}
+        </Popup>
+        <br />
+        <br />
+        {/* if our we have a non-null image url we should 
+      show an image and pass our imageURL state to it*/}
+        {/* {imageURL ? (
+          <img
+            src={imageURL}
+            alt="my signature"
+            style={{
+              display: "block",
+              margin: "0 auto",
+              border: "1px solid black",
+              width: "150px",
+            }}
+          />
+        ) : null} */}
         <div id="pdf-container"></div>
         <div
           className="modal fade"
