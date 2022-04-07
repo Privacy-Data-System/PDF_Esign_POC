@@ -155,8 +155,8 @@ function Annotation() {
     return Arrow;
   })();
 
-  let PDFAnnotate = function (container_id,  options = {}) {
-    console.count('count PDF annote function')
+  let PDFAnnotate = function (container_id, options = {}) {
+    console.count("count PDF annote function");
     this.number_of_pages = 0;
     this.pages_rendered = 0;
     this.active_tool = 1; // 1 - Free hand, 2 - Text, 3 - Arrow, 4 - Rectangle
@@ -178,7 +178,7 @@ function Annotation() {
 
     loadingTask.promise.then(
       function (pdf) {
-        console.log(pdf, 'pdf');
+        console.log(pdf, "pdf");
         var scale = options.scale ? options.scale : 1.3;
         inst.number_of_pages = pdf.numPages;
 
@@ -200,16 +200,14 @@ function Annotation() {
             var renderTask = page.render(renderContext);
 
             renderTask.promise.then(function () {
-              Array.from(document.getElementsByClassName("pdf-canvas")).forEach( function (el, ind) 
-                 {
+              Array.from(document.getElementsByClassName("pdf-canvas")).forEach(
+                function (el, ind) {
                   el.setAttribute("id", "page-" + (ind + 1) + "-canvas");
                 }
               );
               inst.pages_rendered++;
-              if (inst.pages_rendered == inst.number_of_pages){
-
+              if (inst.pages_rendered == inst.number_of_pages) {
                 inst.initFabric();
-
               }
             });
           });
@@ -221,7 +219,7 @@ function Annotation() {
     );
 
     this.initFabric = function () {
-      console.count('Fabric initialize count')
+      console.count("Fabric initialize count");
       var inst = this;
       let canvases = "#" + inst.container_id + " canvas";
       Array.from(document.querySelectorAll(canvases)).forEach(function (
@@ -535,11 +533,9 @@ function Annotation() {
     });
   };
 
-  
-  
   // pdf = !pdf
-  if(!pdf) {
-    pdf = new PDFAnnotate("pdf-container",  {
+  if (!pdf) {
+    pdf = new PDFAnnotate("pdf-container", {
       onPageUpdated(page, oldData, newData) {
         console.log(page, oldData, newData);
       },
@@ -550,7 +546,7 @@ function Annotation() {
       pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
   }
-    console.log(pdf, 'pdfco')
+  console.log(pdf, "pdfco");
 
   function changeActiveTool(event) {
     // console.log(event.currentTarget.parentNode, "event");
@@ -638,9 +634,14 @@ function Annotation() {
     //   pdf.setColor(color);
     // });
 
-    document.getElementById("brush-size").change(function () {
-      let width = this.value;
-      pdf.setBrushSize(width);
+    // document.getElementById("brush-size").change(function () {
+    //   let width = this.value;
+    //   console.log(width,":width")
+    //   pdf.setBrushSize(width);
+    // });
+    
+    document.getElementById("brush-size").addEventListener("change", (e) => {
+      pdf.setBrushSize(e.target.value);
     });
 
     document.getElementById("font-size").change(function () {
@@ -662,12 +663,13 @@ function Annotation() {
             <input
               type="number"
               className="form-control text-right"
-              value="1"
+              // value="1"
+              defaultValue={"1"}
               id="brush-size"
               max="50"
-              onChange={(e) => {
-                setFile(e);
-              }}
+              // onChange={(e) => {
+              //   setFile(e);
+              // }}
             />
           </div>
           <div className="tool">
