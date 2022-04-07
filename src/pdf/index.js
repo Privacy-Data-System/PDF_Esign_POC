@@ -884,6 +884,18 @@ function Annotation() {
             </button>
           </div>
           <div className="tool">
+            <button className="tool-button">
+              <i
+                className="fa fa-eyedropper"
+                title="Add Signature"
+                onClick={(e) => {
+                  // addImage(e);
+                  handleClickOpen();
+                }}
+              ></i>
+            </button>
+          </div>
+          <div className="tool">
             <button
               className="btn btn-danger btn-sm"
               onClick={(e) => {
@@ -918,9 +930,6 @@ function Annotation() {
           </div>
         </div>
         <h1>Signature Pad Example</h1>
-        <Button variant="outlined" onClick={handleClickOpen}>
-          Open dialog
-        </Button>
         {/* <Popup
           modal
           trigger={<button>Open Signature Pad</button>}
@@ -959,14 +968,22 @@ function Annotation() {
                   className: "signatureCanvas",
                 }}
               />
-              <Button onClick={save}>Save</Button>
-              <Button onClick={clear}>Clear</Button>
+
               {/* <Button id="closeBtn" onClick={closeModal()}></Button> */}
             </>
           </DialogContent>
           <DialogActions>
-            <Button autoFocus onClick={handleClose}>
+            {/* <Button autoFocus onClick={handleClose}>
               Save changes
+            </Button> */}
+            <Button onClick={clear}>Clear</Button>
+            <Button
+              onClick={() => {
+                save();
+                handleClose();
+              }}
+            >
+              Save
             </Button>
           </DialogActions>
         </Dialog>
