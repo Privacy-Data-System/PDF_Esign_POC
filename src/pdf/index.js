@@ -4,6 +4,7 @@ import "./pdf.css";
 import sample from "./sample.pdf";
 import { Buffer } from "buffer";
 
+var pdf;
 
 function Annotation() {
   const [file, setFile] = useState();
@@ -248,7 +249,7 @@ function Annotation() {
             );
           });
         }
-        console.log(fabricObj, "  fabricObj.renderAll");
+        // console.log(fabricObj, "  fabricObj.renderAll");
         fabricObj.setBackgroundImage(
           background,
           fabricObj.renderAll.bind(fabricObj)
@@ -534,7 +535,11 @@ function Annotation() {
     });
   };
 
-  let pdf = new PDFAnnotate("pdf-container",  {
+  
+  
+  // pdf = !pdf
+  if(!pdf) {
+    pdf = new PDFAnnotate("pdf-container",  {
       onPageUpdated(page, oldData, newData) {
         console.log(page, oldData, newData);
       },
@@ -544,7 +549,7 @@ function Annotation() {
       scale: 1.5,
       pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
-  
+  }
     console.log(pdf, 'pdfco')
 
   function changeActiveTool(event) {
