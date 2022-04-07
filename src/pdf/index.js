@@ -4,12 +4,20 @@ import "./pdf.css";
 import sample from "./sample.pdf";
 import SignaturePad from "react-signature-canvas";
 import Popup from "reactjs-popup";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import { Buffer } from "buffer";
 import "./sigCanvas.css";
+import { Button } from "@material-ui/core";
+
+var pdf;
 
 function Annotation() {
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
+  const [openSignPad, setopenSignPad] = useState(false);
   const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
   const sigCanvas = useRef({});
   console.log(imageURL, "img");
@@ -22,9 +30,21 @@ function Annotation() {
   console.log(fetchD, "fetchD");
   let fabric = window.fabric;
   const clear = () => sigCanvas.current.clear();
-
+  const closeModal = () => {
+    console.log("triggers");
+    setopenSignPad(false);
+    console.log(openSignPad, ":openSignPad");
+  };
   const location = useLocation();
+  const [open, setOpen] = React.useState(false);
 
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+console.log(imageURL?.length,":imageURL?.length")
+  };
   const { state: pdfUrl } = location || {};
 
   //Fabric Arrow Script //
@@ -259,6 +279,7 @@ function Annotation() {
             );
           });
         }
+        // console.log(fabricObj, "  fabricObj.renderAll");
         fabricObj.setBackgroundImage(
           background,
           fabricObj.renderAll.bind(fabricObj)
@@ -430,34 +451,58 @@ function Annotation() {
     }
   };
   PDFAnnotate.prototype.addSignToCanvas = function () {
-    console.log("in out");
     var inst = this;
     var fabricObj = inst.fabricObjects[inst.active_canvas];
+    // if (fabricObj) {
+    //   var inputElement = document.getElementById("closeBtn");
+    //   // inputElement.type = "file";
+    //   // inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
+    //   inputElement.onchange = function () {
+    //     var reader = new FileReader();
+    //     reader.addEventListener(
+    //       "load",
+    //       function () {
+    //         // inputElement.remove();
+    //         var image = imageURL;
+    //         image.onload = function () {
+    //           fabricObj?.add(new fabric.Image(image));
+    //         };
+    //         image.src = imageURL;
+    //       },
+    //       false
+    //     );
 
     if (fabricObj) {
-      var inputElement = document.getElementById("close");
-      // inputElement.type = "file";
-      // inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
-      inputElement.onchange = function () {
-        var reader = new FileReader();
-        reader.addEventListener(
-          "load",
-          function () {
-            // inputElement.remove();
-            var image = imageURL;
-            image.onload = function () {
-              fabricObj?.add(new fabric.Image(image));
-            };
-            image.src = imageURL;
-          },
-          false
-        );
-        reader.readAsDataURL(imageURL);
-        console.log(
-          reader.readAsDataURL(inputElement.files[0]),
-          "inputElement.files"
-        );
-      };
+      // var inputElement = document.getElementById("closeBtn");
+      var inputElement = document.createElement("input");
+      inputElement.type = "file";
+      inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
+      // inputElement.onchange =
+      // if (imageURL?.length > 0) {
+        console.log("e-Sign Render");
+        (function () {
+          var reader = new FileReader();
+          reader.addEventListener(
+            "load",
+            function () {
+              // inputElement.remove();
+              // var image = imageURL;
+              var image = new Image();
+              image.onload = function () {
+                fabricObj?.add(new fabric.Image(image));
+              };
+              image.src = imageURL;
+            },
+            false
+          );
+          reader.readAsDataURL(imageURL);
+          console.log(
+            reader.readAsDataURL(inputElement.files[0]),
+            "inputElement.files"
+          );
+        })();
+      // }
+
       document.getElementsByTagName("body")[0].appendChild(inputElement);
       inputElement.click();
       // inputElement.click();
@@ -465,7 +510,7 @@ function Annotation() {
   };
   const save = () => {
     setImageURL(sigCanvas.current.getTrimmedCanvas().toDataURL("image/png"));
-    // imageURL.length > 0 && pdf.addSignToCanvas();
+    imageURL.length > 0 && pdf.addSignToCanvas();
   };
 
   PDFAnnotate.prototype.deleteSelectedObject = function () {
@@ -586,17 +631,19 @@ function Annotation() {
     });
   };
 
-  let pdf = new PDFAnnotate("pdf-container", {
-    onPageUpdated(page, oldData, newData) {
-      console.log(page, oldData, newData);
-    },
-    ready() {
-      console.log("Plugin initialized successfully");
-    },
-    scale: 1.5,
-    pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
-  });
-
+  // pdf = !pdf
+  if (!pdf) {
+    pdf = new PDFAnnotate("pdf-container", {
+      onPageUpdated(page, oldData, newData) {
+        console.log(page, oldData, newData);
+      },
+      ready() {
+        console.log("Plugin initialized successfully");
+      },
+      scale: 1.5,
+      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+    });
+  }
   console.log(pdf, "pdfco");
 
   function changeActiveTool(event) {
@@ -685,9 +732,14 @@ function Annotation() {
     //   pdf.setColor(color);
     // });
 
-    document.getElementById("brush-size").change(function () {
-      let width = this.value;
-      pdf.setBrushSize(width);
+    // document.getElementById("brush-size").change(function () {
+    //   let width = this.value;
+    //   console.log(width,":width")
+    //   pdf.setBrushSize(width);
+    // });
+    
+    document.getElementById("brush-size").addEventListener("change", (e) => {
+      pdf.setBrushSize(e.target.value);
     });
 
     document.getElementById("font-size").change(function () {
@@ -709,12 +761,13 @@ function Annotation() {
             <input
               type="number"
               className="form-control text-right"
-              value="1"
+              // value="1"
+              defaultValue={"1"}
               id="brush-size"
               max="50"
-              onChange={(e) => {
-                setFile(e);
-              }}
+              // onChange={(e) => {
+              //   setFile(e);
+              // }}
             />
           </div>
           <div className="tool">
@@ -857,10 +910,13 @@ function Annotation() {
           </div>
         </div>
         <h1>Signature Pad Example</h1>
-        <Popup
+        <Button variant="outlined" onClick={handleClickOpen}>
+        Open dialog
+      </Button>
+        {/* <Popup
           modal
           trigger={<button>Open Signature Pad</button>}
-          closeOnDocumentClick={false}
+          closeOnDocumentClick={openSignPad}
         >
           {(close) => (
             <>
@@ -870,18 +926,42 @@ function Annotation() {
                   className: "signatureCanvas",
                 }}
               />
-              {/* Button to trigger save canvas image */}
               <button onClick={save}>Save</button>
               <button onClick={clear}>Clear</button>
-              <input type="button" id="close" onClick={close}>
-                close
-              </input>
-              {/* <button id="close" onClick={close}>
+              <button id="closeBtn" onClick={closeModal()}>
                 Close
-              </button> */}
+              </button>
             </>
           )}
-        </Popup>
+        </Popup> */}
+
+        <Dialog
+          onClose={handleClose}
+          aria-labelledby="customized-dialog-title"
+          open={open}
+        >
+          <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+            Modal title
+          </DialogTitle>
+          <DialogContent>
+            <>
+              <SignaturePad
+                ref={sigCanvas}
+                canvasProps={{
+                  className: "signatureCanvas",
+                }}
+              />
+              <Button onClick={save}>Save</Button>
+              <Button onClick={clear}>Clear</Button>
+              {/* <Button id="closeBtn" onClick={closeModal()}></Button> */}
+            </>
+          </DialogContent>
+          <DialogActions>
+            <Button autoFocus onClick={handleClose}>
+              Save changes
+            </Button>
+          </DialogActions>
+        </Dialog>
         <br />
         <br />
         {/* if our we have a non-null image url we should 
