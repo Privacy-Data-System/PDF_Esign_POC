@@ -422,7 +422,6 @@ function Annotation() {
     var inst = this;
     var fabricObj = inst.fabricObjects[inst.active_canvas];
     if (img) {
-      console.log("halooo jithin");
       var image = new Image();
       image.onload = function () {
         fabricObj?.add(new fabric.Image(image));
