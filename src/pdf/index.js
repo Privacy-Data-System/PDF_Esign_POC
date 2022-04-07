@@ -20,20 +20,20 @@ function Annotation() {
   const [openSignPad, setopenSignPad] = useState(false);
   const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
   const sigCanvas = useRef({});
-  console.log(imageURL, "img");
+  // console.log(imageURL, "img");
   const fetchD = fetch(imageURL)
     .then((data) => {
-      console.log(data.blob(), " data");
+      // console.log(data.blob(), " data");
       return data.blob();
     })
     .then((res) => window.URL.createObjectURL(new Blob([res])));
-  console.log(fetchD, "fetchD");
+  // console.log(fetchD, "fetchD");
   let fabric = window.fabric;
   const clear = () => sigCanvas.current.clear();
   const closeModal = () => {
-    console.log("triggers");
+    // console.log("triggers");
     setopenSignPad(false);
-    console.log(openSignPad, ":openSignPad");
+    // console.log(openSignPad, ":openSignPad");
   };
   const location = useLocation();
   const [open, setOpen] = React.useState(false);
@@ -43,7 +43,7 @@ function Annotation() {
   };
   const handleClose = () => {
     setOpen(false);
-console.log(imageURL?.length,":imageURL?.length")
+    // console.log(imageURL?.length, ":imageURL?.length");
   };
   const { state: pdfUrl } = location || {};
 
@@ -210,7 +210,7 @@ console.log(imageURL?.length,":imageURL?.length")
 
     loadingTask.promise.then(
       function (pdf) {
-        console.log(pdf, "pdf");
+        // console.log(pdf, "pdf");
         var scale = options.scale ? options.scale : 1.3;
         inst.number_of_pages = pdf.numPages;
 
@@ -309,7 +309,7 @@ console.log(imageURL?.length,":imageURL?.length")
         }
       });
     };
-    console.log(inst, "inst");
+    // console.log(inst, "inst");
     inst.fabricClickHandler = function (event, fabricObj) {
       // var inst = inst;cl
       // console.log(inst.active_tool, "fabric in click handler");
@@ -397,7 +397,7 @@ console.log(imageURL?.length,":imageURL?.length")
 
   PDFAnnotate.prototype.enableAddArrow = function () {
     var inst = this;
-    console.log(inst.active_tool, "inst active tool in ");
+    // console.log(inst.active_tool, "inst active tool in ");
     inst.active_tool = 3;
     if (inst.fabricObjects.length > 0) {
       // $.each(inst.fabricObjects, function (index, fabricObj) {
@@ -409,45 +409,53 @@ console.log(imageURL?.length,":imageURL?.length")
 
       inst.fabricObjects.forEach((fabricObj) => {
         fabricObj.isDrawingMode = false;
-        console.log(Arrow, "Arrow");
+        // console.log(Arrow, "Arrow");
         new Arrow(fabricObj, inst.color, function () {
-          console.log("In out");
+          // console.log("In out");
           inst.active_tool = 0;
         });
       });
     }
   };
 
-  PDFAnnotate.prototype.addImageToCanvas = function () {
+  PDFAnnotate.prototype.addImageToCanvas = function (img) {
     var inst = this;
     var fabricObj = inst.fabricObjects[inst.active_canvas];
-
-    if (fabricObj) {
-      var inputElement = document.createElement("input");
-      inputElement.type = "file";
-      inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
-      inputElement.onchange = function () {
-        var reader = new FileReader();
-        reader.addEventListener(
-          "load",
-          function () {
-            // inputElement.remove();
-            var image = new Image();
-            image.onload = function () {
-              fabricObj?.add(new fabric.Image(image));
-            };
-            image.src = imageURL;
-          },
-          false
-        );
-        reader.readAsDataURL(inputElement.files[0]);
-        console.log(
-          reader.readAsDataURL(inputElement.files[0]),
-          "inputElement.files"
-        );
+    if (img) {
+      console.log("halooo jithin");
+      var image = new Image();
+      image.onload = function () {
+        fabricObj?.add(new fabric.Image(image));
       };
-      document.getElementsByTagName("body")[0].appendChild(inputElement);
-      inputElement.click();
+      image.src = img;
+    } else {
+      if (fabricObj) {
+        var inputElement = document.createElement("input");
+        inputElement.type = "file";
+        inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
+        inputElement.onchange = function () {
+          var reader = new FileReader();
+          reader.addEventListener(
+            "load",
+            function () {
+              // inputElement.remove();
+              var image = new Image();
+              image.onload = function () {
+                fabricObj?.add(new fabric.Image(image));
+              };
+              image.src = imageURL;
+            },
+            false
+          );
+          reader.readAsDataURL(inputElement.files[0]);
+          // console.log(
+          //   reader.readAsDataURL(inputElement.files[0]),
+          //   "inputElement.files"
+          // );
+        };
+        document.getElementsByTagName("body")[0].appendChild(inputElement);
+        inputElement.click();
+      }
     }
   };
   PDFAnnotate.prototype.addSignToCanvas = function () {
@@ -479,28 +487,28 @@ console.log(imageURL?.length,":imageURL?.length")
       inputElement.accept = ".jpg,.jpeg,.png,.PNG,.JPG,.JPEG";
       // inputElement.onchange =
       // if (imageURL?.length > 0) {
-        console.log("e-Sign Render");
-        (function () {
-          var reader = new FileReader();
-          reader.addEventListener(
-            "load",
-            function () {
-              // inputElement.remove();
-              // var image = imageURL;
-              var image = new Image();
-              image.onload = function () {
-                fabricObj?.add(new fabric.Image(image));
-              };
-              image.src = imageURL;
-            },
-            false
-          );
-          reader.readAsDataURL(imageURL);
-          console.log(
-            reader.readAsDataURL(inputElement.files[0]),
-            "inputElement.files"
-          );
-        })();
+      // console.log("e-Sign Render");
+      (function () {
+        var reader = new FileReader();
+        reader.addEventListener(
+          "load",
+          function () {
+            // inputElement.remove();
+            // var image = imageURL;
+            var image = new Image();
+            image.onload = function () {
+              fabricObj?.add(new fabric.Image(image));
+            };
+            image.src = imageURL;
+          },
+          false
+        );
+        reader.readAsDataURL(imageURL);
+        // console.log(
+        //   reader.readAsDataURL(inputElement.files[0]),
+        //   "inputElement.files"
+        // );
+      })();
       // }
 
       document.getElementsByTagName("body")[0].appendChild(inputElement);
@@ -509,19 +517,20 @@ console.log(imageURL?.length,":imageURL?.length")
     }
   };
   const save = () => {
-    setImageURL(sigCanvas.current.getTrimmedCanvas().toDataURL("image/png"));
-    imageURL.length > 0 && pdf.addSignToCanvas();
+    let img = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
+    setImageURL(img);
+    img.length > 0 && pdf.addImageToCanvas(img);
   };
 
   PDFAnnotate.prototype.deleteSelectedObject = function () {
     var inst = this;
     var activeObject =
       inst.fabricObjects[inst.active_canvas]?.getActiveObject();
-    console.log(activeObject, "activeObject");
-    console.log(
-      inst.fabricObjects[inst.active_canvas].remove(activeObject),
-      "inst.fabricObjects"
-    );
+    // console.log(activeObject, "activeObject");
+    // console.log(
+    //   inst.fabricObjects[inst.active_canvas].remove(activeObject),
+    //   "inst.fabricObjects"
+    // );
     if (activeObject) {
       if (alert("Are you sure ?")) {
         return inst.fabricObjects[inst.active_canvas].remove(activeObject);
@@ -566,7 +575,7 @@ console.log(imageURL?.length,":imageURL?.length")
     //   fabricObj.freeDrawingBrush.width = size;
     // });
     inst.fabricObjects.forEach((fabricObj) => {
-      console.log(fabricObj.freeDrawingBrush, "fabricObj.freeDrawingBrush");
+      // console.log(fabricObj.freeDrawingBrush, "fabricObj.freeDrawingBrush");
       fabricObj.freeDrawingBrush.width = size;
     });
   };
@@ -600,9 +609,9 @@ console.log(imageURL?.length,":imageURL?.length")
     var fabricObj = inst.fabricObjects[inst.active_canvas];
     // console.log(fabricObj.clear(), "fabricObj");
     var bg = fabricObj.backgroundImage;
-    console.log(bg, "bg");
+    // console.log(bg, "bg");
     if (window.confirm("Are you sure?")) {
-      console.log("In out clear");
+      // console.log("In out clear");
       fabricObj.clear();
       fabricObj.setBackgroundImage(bg, fabricObj.renderAll.bind(fabricObj));
     }
@@ -635,16 +644,16 @@ console.log(imageURL?.length,":imageURL?.length")
   if (!pdf) {
     pdf = new PDFAnnotate("pdf-container", {
       onPageUpdated(page, oldData, newData) {
-        console.log(page, oldData, newData);
+        // console.log(page, oldData, newData);
       },
       ready() {
-        console.log("Plugin initialized successfully");
+        // console.log("Plugin initialized successfully");
       },
       scale: 1.5,
       pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
   }
-  console.log(pdf, "pdfco");
+  // console.log(pdf, "pdfco");
 
   function changeActiveTool(event) {
     // console.log(event.currentTarget.parentNode, "event");
@@ -705,7 +714,7 @@ console.log(imageURL?.length,":imageURL?.length")
     // pdf.savePdf();
 
     let b64 = new Buffer.from(pdfUrl).toString("base64");
-    console.log(b64, "b64");
+    // console.log(b64, "b64");
     pdf.savePdf(b64); // save with given file name
   }
 
@@ -737,7 +746,7 @@ console.log(imageURL?.length,":imageURL?.length")
     //   console.log(width,":width")
     //   pdf.setBrushSize(width);
     // });
-    
+
     document.getElementById("brush-size").addEventListener("change", (e) => {
       pdf.setBrushSize(e.target.value);
     });
@@ -911,8 +920,8 @@ console.log(imageURL?.length,":imageURL?.length")
         </div>
         <h1>Signature Pad Example</h1>
         <Button variant="outlined" onClick={handleClickOpen}>
-        Open dialog
-      </Button>
+          Open dialog
+        </Button>
         {/* <Popup
           modal
           trigger={<button>Open Signature Pad</button>}
