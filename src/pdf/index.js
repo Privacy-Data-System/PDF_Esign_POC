@@ -22,7 +22,7 @@ function Annotation() {
   const [openEsign, setOpenEsign] = useState(false);
   const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
   const sigCanvas = useRef({});
-  // console.log(imageURL, "img");
+  console.log(imageURL, "img");
   const fetchD = fetch(imageURL)
     .then((data) => {
       // console.log(data.blob(), " data");

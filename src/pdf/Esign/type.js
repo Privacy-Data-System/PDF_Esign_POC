@@ -8,7 +8,7 @@ import React, { useState, useRef, useEffect } from "react";
 const { createCanvas, loadImage } = require("canvas");
 const Type = ({ setImageURL }) => {
   const [val, setValue] = useState("");
-  const canvas = createCanvas(1000,1000);
+  const canvas = createCanvas(1000, 1000);
   const ctx = canvas.getContext("2d");
   var generate = function () {
     var text = val?.split("\n").join("\n");
@@ -30,6 +30,7 @@ const Type = ({ setImageURL }) => {
     for (var i = 0; i < lines.length; i++)
       ctx.fillText(lines[i], x, y + i * lineheight);
     // img.src = ctx.canvas.toDataURL();
+    setImageURL(ctx.canvas.toDataURL());
     console.log(ctx.canvas.toDataURL(), "Hello");
   };
 
