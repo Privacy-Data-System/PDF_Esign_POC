@@ -3,7 +3,7 @@ import React, { useRef } from 'react'
 import SignaturePad from "react-signature-canvas";
 import "../sigCanvas.css";
 
-const sign = () => {
+const sign = ({setOpenEsign, setImageURL}) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const sigCanvas = useRef({});
     const clear = () => sigCanvas.current.clear();
@@ -11,7 +11,9 @@ const sign = () => {
         let img = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
         // setImageURL(img);
         // img.length > 0 && pdf.addImageToCanvas(img);
-        console.log(img,":img")
+        console.log(img,":img Rajesh")
+        img?.length > 0 &&  setImageURL(img)
+        setOpenEsign(false);
       };
   return (
     <div>

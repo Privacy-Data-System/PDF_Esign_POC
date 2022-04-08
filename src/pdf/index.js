@@ -523,6 +523,10 @@ function Annotation() {
     setImageURL(img);
     img.length > 0 && pdf.addImageToCanvas(img);
   };
+  if (imageURL?.length > 0) {
+    console.log(":triggers");
+    pdf.addImageToCanvas(imageURL);
+  }
 
   PDFAnnotate.prototype.deleteSelectedObject = function () {
     var inst = this;
@@ -722,6 +726,7 @@ function Annotation() {
 
   function clearPage() {
     pdf.clearActivePage();
+    setImageURL(null);
   }
 
   // function showPdfData() {
@@ -1010,7 +1015,10 @@ function Annotation() {
           </DialogTitle>
           <DialogContent>
             <>
-              <BasicTabs setImageURL={setImageURL}  />
+              <BasicTabs
+                setImageURL={setImageURL}
+                setOpenEsign={setOpenEsign}
+              />
             </>
           </DialogContent>
           <DialogActions>

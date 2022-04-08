@@ -40,7 +40,7 @@ function a11yProps(index) {
   };
 }
 
-export default function BasicTabs({setImageURL}) {
+export default function BasicTabs({setImageURL, setOpenEsign}) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -61,7 +61,7 @@ export default function BasicTabs({setImageURL}) {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        <Sign />
+        <Sign setOpenEsign={setOpenEsign} setImageURL={setImageURL}/>
       </TabPanel>
       <TabPanel value={value} index={1}>
         <Type setImageURL={setImageURL}/>
