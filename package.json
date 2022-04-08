@@ -11,6 +11,7 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "buffer": "^6.0.3",
+    "canvas": "^2.9.1",
     "fabric": "^5.2.1",
     "jspdf": "^2.5.1",
     "pdfjs": "^2.4.7",
