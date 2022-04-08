@@ -1,5 +1,7 @@
 import { Button } from "@mui/material";
 import React, { useState, useRef, useEffect } from "react";
+import Radio from "@mui/material/Radio";
+import "./type.css";
 // import { createCanvas, loadImage } from "canvas";
 // import Canvas from "./Canvas";
 // import { generate } from "text-to-image";
@@ -8,6 +10,20 @@ import React, { useState, useRef, useEffect } from "react";
 const { createCanvas, loadImage } = require("canvas");
 const Type = ({ setImageURL }) => {
   const [val, setValue] = useState("");
+  const [selectedValue, setSelectedValue] = React.useState("");
+
+  //Font family
+  const [italicFont, setItalicFont] = useState("");
+  const handleChange = (event) => {
+    setSelectedValue(event.target.value);
+    if (event.target.value === "f") {
+      setItalicFont("fantasy");
+    } else if (event.target.value === "c") {
+      setItalicFont("cursive");
+    } else if (event.target.value === "s") {
+      setItalicFont("serif");
+    }
+  };
   const canvas = createCanvas(1000, 1000);
   const ctx = canvas.getContext("2d");
   var generate = function () {
@@ -37,9 +53,53 @@ const Type = ({ setImageURL }) => {
   return (
     <>
       {/* <div class="container"> */}
-      <div>
-        <input type="text" onChange={(e) => setValue(e.target.value)} />
+      <div className="typeContainer">
+        <input
+          type="text"
+          onChange={(e) => setValue(e.target.value)}
+          className="text"
+          style={{ fontFamily: italicFont }}
+        />
         <button onClick={() => generate()}>Save</button>
+        <br />
+
+        {val?.length > 0 && (
+          <div>
+            <div>
+              <Radio
+                checked={selectedValue === "s"}
+                onChange={handleChange}
+                value="s"
+                name="radio-buttons"
+                inputProps={{ "aria-label": "A" }}
+              />
+
+              <p style={{ fontFamily: "serif" }}>{val}</p>
+            </div>
+            <div>
+              <Radio
+                checked={selectedValue === "c"}
+                onChange={handleChange}
+                value="c"
+                name="radio-buttons"
+                inputProps={{ "aria-label": "A" }}
+              />
+
+              <p style={{ fontFamily: "cursive" }}>{val}</p>
+            </div>
+            <div>
+              <Radio
+                checked={selectedValue === "f"}
+                onChange={handleChange}
+                value="f"
+                name="radio-buttons"
+                inputProps={{ "aria-label": "A" }}
+              />
+
+              <p style={{ fontFamily: "fantasy" }}>{val}</p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
