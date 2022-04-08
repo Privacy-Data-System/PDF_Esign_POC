@@ -10,8 +10,8 @@ function App() {
     <>
       <Router>
         <Switch>
+          <Route exact path="/" component={UploadPdf} />
           <Route path="/tab" component={BasicTabs} />
-          <Route path="/" component={UploadPdf} />
           <Route path="/pdf-annotation" component={Annotation} />
 
         </Switch>

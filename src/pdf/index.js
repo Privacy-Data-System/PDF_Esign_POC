@@ -11,6 +11,7 @@ import DialogActions from "@mui/material/DialogActions";
 import { Buffer } from "buffer";
 import "./sigCanvas.css";
 import { Button } from "@material-ui/core";
+import BasicTabs from "./eSingnature";
 
 var pdf;
 
@@ -18,6 +19,7 @@ function Annotation() {
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
   const [openSignPad, setopenSignPad] = useState(false);
+  const [openEsign, setOpenEsign] = useState(false);
   const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
   const sigCanvas = useRef({});
   // console.log(imageURL, "img");
@@ -43,6 +45,7 @@ function Annotation() {
   };
   const handleClose = () => {
     setOpen(false);
+    setOpenEsign(false);
     // console.log(imageURL?.length, ":imageURL?.length");
   };
   const { state: pdfUrl } = location || {};
@@ -916,6 +919,16 @@ function Annotation() {
             </button>
           </div>
           <div className="tool">
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => {
+                setOpenEsign(true);
+              }}
+            >
+              e-Signature
+            </button>
+          </div>
+          <div className="tool">
             <button className="btn btn-info btn-sm">{}</button>
           </div>
           <div className="tool">
@@ -980,6 +993,29 @@ function Annotation() {
             <Button
               onClick={() => {
                 save();
+                handleClose();
+              }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog
+          onClose={handleClose}
+          aria-labelledby="customized-dialog-title"
+          open={openEsign}
+        >
+          <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+            E-Signature
+          </DialogTitle>
+          <DialogContent>
+            <>
+              <BasicTabs setImageURL={setImageURL}  />
+            </>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
                 handleClose();
               }}
             >
