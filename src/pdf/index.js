@@ -520,12 +520,12 @@ function Annotation() {
   };
   const save = () => {
     let img = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
-    setImageURL(img);
+    // setImageURL(img);
     img.length > 0 && pdf.addImageToCanvas(img);
   };
   if (imageURL?.length > 0) {
-    console.log(":triggers");
     pdf.addImageToCanvas(imageURL);
+    setImageURL(null);
   }
 
   PDFAnnotate.prototype.deleteSelectedObject = function () {
