@@ -11,11 +11,11 @@ const sign = ({setOpenEsign, setImageURL}) => {
         let img = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
         // setImageURL(img);
         // img.length > 0 && pdf.addImageToCanvas(img);
-        console.log(img,":img Rajesh")
         img?.length > 0 &&  setImageURL(img)
         setOpenEsign(false);
       };
   return (
+    <>
     <div>
         <SignaturePad
     ref={sigCanvas}
@@ -23,9 +23,12 @@ const sign = ({setOpenEsign, setImageURL}) => {
       className: "signatureCanvas",
     }}
   />
-  <Button onClick={clear}>Clear</Button>
+  </div>
+  <div>
+    <Button onClick={clear}>Clear</Button>
   <Button onClick={save}>Save</Button>
   </div>
+  </>
   )
 }
 
