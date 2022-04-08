@@ -976,33 +976,38 @@ function Annotation() {
           open={open}
         >
           <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-            Modal title
+            Signature
           </DialogTitle>
           <DialogContent>
             <>
+            <div>
               <SignaturePad
                 ref={sigCanvas}
                 canvasProps={{
                   className: "signatureCanvas",
                 }}
               />
-
+              </div>
+              <div>
+              <Button onClick={clear} color='primary'>Clear</Button>
+              <Button
+                onClick={() => {
+                  save();
+                  handleClose();
+                }}
+                color='primary'
+              >
+                Save
+              </Button>
+            </div>
               {/* <Button id="closeBtn" onClick={closeModal()}></Button> */}
             </>
           </DialogContent>
           <DialogActions>
-            {/* <Button autoFocus onClick={handleClose}>
-              Save changes
-            </Button> */}
-            <Button onClick={clear}>Clear</Button>
-            <Button
-              onClick={() => {
-                save();
-                handleClose();
-              }}
-            >
-              Save
+            <Button autoFocus color='primary' onClick={handleClose}>
+              Close
             </Button>
+            
           </DialogActions>
         </Dialog>
         <Dialog
@@ -1026,8 +1031,9 @@ function Annotation() {
               onClick={() => {
                 handleClose();
               }}
+              color='primary'
             >
-              Save
+              Close
             </Button>
           </DialogActions>
         </Dialog>
