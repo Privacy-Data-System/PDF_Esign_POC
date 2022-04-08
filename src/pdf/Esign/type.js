@@ -2,6 +2,7 @@ import { Button } from "@mui/material";
 import React, { useState, useRef, useEffect } from "react";
 import Radio from "@mui/material/Radio";
 import "./type.css";
+
 // import { createCanvas, loadImage } from "canvas";
 // import Canvas from "./Canvas";
 // import { generate } from "text-to-image";
@@ -13,36 +14,39 @@ const Type = ({ setImageURL }) => {
   const [selectedValue, setSelectedValue] = React.useState("");
 
   //Font family
-  const [italicFont, setItalicFont] = useState("");
+  const [italicFont, setItalicFont] = useState("small-caps 30px Verdana");
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
     if (event.target.value === "f") {
-      setItalicFont("fantasy");
+      setItalicFont("italic bold 30px monospace");
     } else if (event.target.value === "c") {
-      setItalicFont("cursive");
+      setItalicFont("30px monospace");
     } else if (event.target.value === "s") {
-      setItalicFont("serif");
+      setItalicFont("30px serif");
+    } else if (event.target.value === "cu") {
+      setItalicFont(" 30px cursive");
     }
   };
-  const canvas = createCanvas(1000, 1000);
+  const canvas = createCanvas(800, 800);
   const ctx = canvas.getContext("2d");
   var generate = function () {
     var text = val?.split("\n").join("\n");
-    var x = 12.5;
-    var y = 15;
+    var x = 20;
+    var y = 20;
     var lineheight = 30;
     var lines = text.split("\n");
     var lineLengthOrder = lines.slice(0).sort(function (a, b) {
       return b.length - a.length;
     });
-    ctx.canvas.width = ctx.measureText(lineLengthOrder[0]).width + 25;
-    ctx.canvas.height = lines.length * lineheight;
+    ctx.canvas.width =
+      ctx.measureText(lineLengthOrder[0]).width + 100 + val?.length * 10;
+    ctx.canvas.height = lines.length * lineheight * 2;
 
-    ctx.fillStyle = "#232323";
+    ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.textBaseline = "middle";
-    ctx.font = "20px Anonymous Pro";
-    ctx.fillStyle = "#BBBBBB";
+    ctx.font = italicFont;
+    ctx.fillStyle = "#000000";
     for (var i = 0; i < lines.length; i++)
       ctx.fillText(lines[i], x, y + i * lineheight);
     // img.src = ctx.canvas.toDataURL();
@@ -63,9 +67,9 @@ const Type = ({ setImageURL }) => {
         <button onClick={() => generate()}>Save</button>
         <br />
 
-        {val?.length > 0 && (
-          <div>
-            <div>
+        {
+          <div className="radioCon">
+            <div style={{ marginTop: "20px" }}>
               <Radio
                 checked={selectedValue === "s"}
                 onChange={handleChange}
@@ -74,9 +78,12 @@ const Type = ({ setImageURL }) => {
                 inputProps={{ "aria-label": "A" }}
               />
 
-              <p style={{ fontFamily: "serif" }}>{val}</p>
+              <p style={{ font: "30px serif" }}>
+                {" "}
+                {val?.length === 0 ? <p>Signature</p> : val}
+              </p>
             </div>
-            <div>
+            <div style={{ marginTop: "20px" }}>
               <Radio
                 checked={selectedValue === "c"}
                 onChange={handleChange}
@@ -85,9 +92,12 @@ const Type = ({ setImageURL }) => {
                 inputProps={{ "aria-label": "A" }}
               />
 
-              <p style={{ fontFamily: "cursive" }}>{val}</p>
+              <p style={{ fontFamily: "30px monospace" }}>
+                {" "}
+                {val?.length === 0 ? <p>Signature</p> : val}
+              </p>
             </div>
-            <div>
+            <div style={{ marginTop: "100px" }}>
               <Radio
                 checked={selectedValue === "f"}
                 onChange={handleChange}
@@ -96,10 +106,26 @@ const Type = ({ setImageURL }) => {
                 inputProps={{ "aria-label": "A" }}
               />
 
-              <p style={{ fontFamily: "fantasy" }}>{val}</p>
+              <p style={{ font: "italic bold 30px monospace" }}>
+                {" "}
+                {val?.length === 0 ? <p>Signature</p> : val}
+              </p>
+            </div>
+            <div style={{ marginTop: "100px" }}>
+              <Radio
+                checked={selectedValue === "cu"}
+                onChange={handleChange}
+                value="cu"
+                name="radio-buttons"
+                inputProps={{ "aria-label": "A" }}
+              />
+
+              <p style={{ font: "30px cursive" }}>
+                {val?.length === 0 ? <p>Signature</p> : val}
+              </p>
             </div>
           </div>
-        )}
+        }
       </div>
     </>
   );

@@ -2,3 +2,9 @@
   width: 25vw;
   height: 25vh;
 }
+
+.radioCon {
+  display: grid;
+  grid: 20px / auto auto;
+  /* margin: 80px; */
+}
