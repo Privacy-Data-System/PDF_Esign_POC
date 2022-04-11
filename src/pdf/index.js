@@ -1017,7 +1017,7 @@ function Annotation() {
       <div className="body">
         <div className="toolbar">
           <div className="tool">
-            <span>PDFJS + FabricJS + jsPDF</span>
+            <span>Sender End</span>
           </div>
           <div className="tool">
             <label htmlFor="brush-size">Brush size</label>
