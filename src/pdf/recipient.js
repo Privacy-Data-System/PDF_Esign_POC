@@ -507,6 +507,33 @@ function Annotation() {
     fabricObj?.add(rect);
   };
 
+  PDFAnnotate.prototype.confirmSign = async function (img) {
+    const emblemImageBytes = await fetch(img).then((res) => res.arrayBuffer());
+    const pdfDoc = await PDFDocument.load(pdfUrl);
+    const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
+    const form = pdfDoc.getForm();
+    const fields = form.getFields();
+    fields.forEach((field) => {
+      const name = field.getName();
+      const button = form.getButton(name);
+      button.setImage(emblemImage);
+    });
+    const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+    const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
+      res.arrayBuffer()
+    );
+    pdf = null;
+    pdf = new PDFAnnotate("pdf-container", emblempdfBytes, {
+      onPageUpdated(page, oldData, newData) {
+        // console.log(page, oldData, newData);
+      },
+      ready() {
+        // console.log("Plugin initialized successfully");
+      },
+      // scale: 1,
+      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+    });
+  };
   PDFAnnotate.prototype.addsign = function () {
     var inst = this;
     signfabricObj = inst.fabricObjects[inst.active_canvas];
@@ -666,7 +693,8 @@ function Annotation() {
     img.length > 0 && pdf.addImageToCanvas(img);
   };
   if (imageURL?.length > 0) {
-    pdf.addImageToCanvas(imageURL);
+    // pdf.addImageToCanvas(imageURL);
+    confirmSign(imageURL);
     setImageURL(null);
   }
 
@@ -827,8 +855,8 @@ function Annotation() {
     pdf.setBorderColor("blue");
     pdf.addsign();
   }
-  function confirmSign() {
-    pdf.confirmSign();
+  function confirmSign(imageURL) {
+    pdf.confirmSign(imageURL);
   }
   function enablePencil(event) {
     event?.preventDefault();
@@ -1107,16 +1135,17 @@ function Annotation() {
               Add sign
             </button>
           </div>
-          {/* <div className="tool">
+          <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => {
-                confirmSign(e);
+                // confirmSign(e);
+                setOpenEsign(true);
               }}
             >
               Confirm sign
             </button>
-          </div> */}
+          </div>
           <div className="tool">
             <button
               className="btn btn-danger btn-sm"
@@ -1209,6 +1238,7 @@ function Annotation() {
                 <Button
                   onClick={() => {
                     save();
+
                     handleClose();
                   }}
                   color="primary"

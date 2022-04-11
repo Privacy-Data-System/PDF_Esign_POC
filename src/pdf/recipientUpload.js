@@ -13,7 +13,7 @@ function UploadPdf() {
     reader.readAsArrayBuffer(file);
     reader.onload = () => {
       history.push({
-        pathname: "/sender",
+        pathname: "/reciver",
         state: new Uint8Array(reader.result),
       });
     };
