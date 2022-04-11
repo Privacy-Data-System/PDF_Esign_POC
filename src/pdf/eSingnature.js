@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Sign from "./Esign/sign";
 import Type from "./Esign/type";
+import Upload from "./Esign/Upload";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -40,7 +41,7 @@ function a11yProps(index) {
   };
 }
 
-export default function BasicTabs({setImageURL, setOpenEsign}) {
+export default function BasicTabs({ setImageURL, setOpenEsign }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -61,13 +62,13 @@ export default function BasicTabs({setImageURL, setOpenEsign}) {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        <Sign setOpenEsign={setOpenEsign} setImageURL={setImageURL}/>
+        <Sign setOpenEsign={setOpenEsign} setImageURL={setImageURL} />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <Type setImageURL={setImageURL}/>
+        <Type setImageURL={setImageURL} />
       </TabPanel>
       <TabPanel value={value} index={2}>
-        Image
+        <Upload setImageURL={setImageURL} />
       </TabPanel>
     </Box>
   );
