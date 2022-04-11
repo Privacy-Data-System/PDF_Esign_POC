@@ -1,10 +1,37 @@
+@import url("https://fonts.googleapis.com/css2?family=Anek+Devanagari:wght@200&family=Beau+Rivage&family=Dancing+Script&family=Grape+Nuts&family=Poppins:wght@300;400;500;600&display=swap");
+
 .typeContainer {
   width: 25vw;
   height: 25vh;
+  /* display: flex; */
 }
 
 .radioCon {
   display: grid;
   grid: 20px / auto auto;
   /* margin: 80px; */
+}
+.textCon {
+  display: flex;
+  justify-content: center;
+}
+.one {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 25px;
+}
+.two {
+  font-family: "Grape Nuts", cursive;
+  font-weight: 700;
+  font-size: 25px;
+}
+.three {
+  font-family: "Anek Devanagari", sans-serif;
+  font-weight: 700;
+  font-size: 25px;
+}
+.four {
+  font-family: "Dancing Script", cursive;
+  font-weight: 700;
+  font-size: 25px;
 }

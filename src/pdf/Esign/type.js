@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import React, { useState, useRef, useEffect } from "react";
 import Radio from "@mui/material/Radio";
 import "./type.css";
@@ -10,6 +10,7 @@ import "./type.css";
 
 const { createCanvas, loadImage } = require("canvas");
 const Type = ({ setImageURL }) => {
+  const inputRef = useRef(null);
   const [val, setValue] = useState("");
   const [selectedValue, setSelectedValue] = React.useState("");
 
@@ -18,13 +19,17 @@ const Type = ({ setImageURL }) => {
   const handleChange = (event) => {
     setSelectedValue(event.target.value);
     if (event.target.value === "f") {
-      setItalicFont("italic bold 30px monospace");
+      setItalicFont("30px Lucida Handwriting");
+      inputRef.current.style.font = "30px Lucida Handwriting";
     } else if (event.target.value === "c") {
-      setItalicFont("30px monospace");
+      setItalicFont("30px Ink Free");
+      inputRef.current.style.font = "30px Ink Free";
     } else if (event.target.value === "s") {
       setItalicFont("30px serif");
+      inputRef.current.style.font = "30px serif";
     } else if (event.target.value === "cu") {
-      setItalicFont(" 30px cursive");
+      setItalicFont("30px cursive");
+      inputRef.current.style.font = "30px cursive";
     }
   };
   const canvas = createCanvas(800, 800);
@@ -58,13 +63,23 @@ const Type = ({ setImageURL }) => {
     <>
       {/* <div class="container"> */}
       <div className="typeContainer">
-        <input
-          type="text"
-          onChange={(e) => setValue(e.target.value)}
-          className="text"
-          style={{ fontFamily: italicFont }}
-        />
-        <button onClick={() => generate()}>Save</button>
+        <div className="textCon">
+          <TextField
+            type="text"
+            onChange={(e) => setValue(e.target.value)}
+            // className="textCon"
+            // style={{ display: "flex", justifyContent: "center" }}
+            inputRef={inputRef}
+            variant="standard"
+            fullWidth
+            placeholder="Signature"
+          />
+          {""}
+          <Button style={{ marginLeft: "15px" }} onClick={() => generate()}>
+            Save
+          </Button>
+        </div>
+
         <br />
 
         {
@@ -92,7 +107,7 @@ const Type = ({ setImageURL }) => {
                 inputProps={{ "aria-label": "A" }}
               />
 
-              <p style={{ fontFamily: "30px monospace" }}>
+              <p style={{ font: "30px Ink Free" }}>
                 {" "}
                 {val?.length === 0 ? <p>Signature</p> : val}
               </p>
@@ -106,7 +121,7 @@ const Type = ({ setImageURL }) => {
                 inputProps={{ "aria-label": "A" }}
               />
 
-              <p style={{ font: "italic bold 30px monospace" }}>
+              <p style={{ font: "30px Lucida Handwriting" }}>
                 {" "}
                 {val?.length === 0 ? <p>Signature</p> : val}
               </p>
