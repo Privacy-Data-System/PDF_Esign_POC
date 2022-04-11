@@ -983,7 +983,7 @@ function Annotation() {
           <div className="tool">
             <span>PDFJS + FabricJS + jsPDF</span>
           </div>
-          <div className="tool">
+          {/* <div className="tool">
             <label htmlFor="brush-size">Brush size</label>
             <input
               type="number"
@@ -996,8 +996,8 @@ function Annotation() {
               //   setFile(e);
               // }}
             />
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <label htmlFor="font-size">Font size</label>
             <select id="font-size" className="form-control">
               <option value="10">10</option>
@@ -1013,8 +1013,8 @@ function Annotation() {
               <option value="72">72</option>
               <option value="108">108</option>
             </select>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button
               className="color-tool active"
               style={{ backgroundColor: "#212121" }}
@@ -1035,8 +1035,8 @@ function Annotation() {
               className="color-tool"
               style={{ backgroundColor: "yellow" }}
             ></button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button active">
               <i
                 className="fa fa-hand-paper-o"
@@ -1046,8 +1046,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button active">
               <i
                 className="fa fa-hand-paper-o"
@@ -1057,8 +1057,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className={`tool-button active`}>
               <i
                 className="fa fa-pencil"
@@ -1068,8 +1068,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button">
               <i
                 className="fa fa-font"
@@ -1079,8 +1079,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button ">
               <i
                 className="fa fa-long-arrow-right"
@@ -1090,8 +1090,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button">
               <i
                 className="fa fa-square-o"
@@ -1101,8 +1101,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button">
               <i
                 className="fa fa-picture-o"
@@ -1112,8 +1112,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button className="tool-button">
               <i
                 className="fa fa-eyedropper"
@@ -1124,8 +1124,8 @@ function Annotation() {
                 }}
               ></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => {
@@ -1134,7 +1134,7 @@ function Annotation() {
             >
               Add sign
             </button>
-          </div>
+          </div> */}
           <div className="tool">
             <button
               className="btn btn-info btn-sm"
@@ -1146,7 +1146,7 @@ function Annotation() {
               Confirm sign
             </button>
           </div>
-          <div className="tool">
+          {/* <div className="tool">
             <button
               className="btn btn-danger btn-sm"
               onClick={(e) => {
@@ -1155,8 +1155,8 @@ function Annotation() {
             >
               <i className="fa fa-trash"></i>
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button
               className="btn btn-danger btn-sm"
               onClick={() => {
@@ -1165,7 +1165,7 @@ function Annotation() {
             >
               Clear Page
             </button>
-          </div>
+          </div> */}
           {/* <div className="tool">
             <button
               className="btn btn-danger btn-sm"
@@ -1176,9 +1176,9 @@ function Annotation() {
               e-Signature
             </button>
           </div> */}
-          <div className="tool">
+          {/* <div className="tool">
             <button className="btn btn-info btn-sm">{}</button>
-          </div>
+          </div> */}
           <div className="tool">
             <button
               className="btn btn-light btn-sm"

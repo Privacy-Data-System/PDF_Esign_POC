@@ -20,6 +20,7 @@ var rect;
 var sign;
 var signfabricObj;
 var left, top;
+var pdf2;
 function Annotation() {
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
@@ -55,6 +56,7 @@ function Annotation() {
   };
   const { state: pdfUrl } = location || {};
 
+  const [statePdfUrl, setStatePdfUrl] = useState(pdfUrl);
   useEffect(() => {
     (async () => {
       const emblemUrl = "https://pdf-lib.js.org/assets/mario_emblem.png";
@@ -507,6 +509,75 @@ function Annotation() {
     fabricObj?.add(rect);
   };
 
+  PDFAnnotate.prototype.confirmSign = async function (fileName) {
+    var inst = this;
+    signfabricObj.remove(sign);
+    var doc = new window.jspdf.jsPDF();
+    if (typeof fileName === "undefined") {
+      fileName = `${new Date().getTime()}.pdf`;
+    }
+
+    inst.fabricObjects.forEach(async function (fabricObj, index) {
+      if (index !== 0) {
+        doc.addPage();
+        doc.setPage(index + 1);
+      }
+      doc.addImage(
+        fabricObj.toDataURL({
+          format: "png",
+        }),
+        inst.pageImageCompression === "NONE" ? "PNG" : "JPEG",
+        0,
+        0,
+        doc.internal.pageSize.getWidth(),
+        doc.internal.pageSize.getHeight(),
+        `page-${index + 1}`,
+        ["FAST", "MEDIUM", "SLOW"].indexOf(inst.pageImageCompression) >= 0
+          ? inst.pageImageCompression
+          : undefined
+      );
+      if (index === inst.fabricObjects.length - 1) {
+        pdf2 = new Buffer.from(doc.output("arraybuffer"));
+        const emblemUrl = "/signfield.png";
+        const emblemImageBytes = await fetch(emblemUrl).then((res) =>
+          res.arrayBuffer()
+        );
+
+        const pdfDoc = await PDFDocument.load(pdf2);
+        const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
+        const pages = pdfDoc.getPages();
+
+        // Get the form so we can add fields to it
+        const form = pdfDoc.getForm();
+        const button = form.createButton("sign");
+        button.addToPage("content", pages[0], {
+          x: left,
+          y: top,
+        });
+
+        button.setImage(emblemImage);
+        const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+        // const pdfBytes = await pdfDoc.save();
+        const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
+          res.arrayBuffer()
+        );
+
+        pdf = null;
+        pdf = new PDFAnnotate("pdf-container", emblempdfBytes, {
+          onPageUpdated(page, oldData, newData) {
+            // console.log(page, oldData, newData);
+          },
+          ready() {
+            // console.log("Plugin initialized successfully");
+          },
+          // scale: 1,
+          pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+        });
+      }
+    });
+
+    // statePdfUrl(emblempdfBytes);
+  };
   PDFAnnotate.prototype.addsign = function () {
     var inst = this;
     signfabricObj = inst.fabricObjects[inst.active_canvas];
@@ -692,12 +763,12 @@ function Annotation() {
     if (typeof fileName === "undefined") {
       fileName = `${new Date().getTime()}.pdf`;
     }
-
-    inst.fabricObjects.forEach(function (fabricObj, index) {
+    inst.fabricObjects.forEach(async function (fabricObj, index) {
       if (index !== 0) {
         doc.addPage();
         doc.setPage(index + 1);
       }
+      console.log(fabricObj, "fabricObj");
       doc.addImage(
         fabricObj.toDataURL({
           format: "png",
@@ -713,7 +784,32 @@ function Annotation() {
           : undefined
       );
       if (index === inst.fabricObjects.length - 1) {
-        doc.save(fileName);
+        // doc.save(fileName);
+        let pdfBuffer = new Buffer.from(doc.output("arraybuffer"));
+        const emblemUrl = "/signfield.png";
+        const emblemImageBytes = await fetch(emblemUrl).then((res) =>
+          res.arrayBuffer()
+        );
+        const pdfDoc = await PDFDocument.load(pdfBuffer);
+        const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
+        const pages = pdfDoc.getPages();
+        const form = pdfDoc.getForm();
+        const button = form.createButton("sign");
+        button.addToPage("content", pages[0], {
+          x: left,
+          y: top,
+        });
+        button.setImage(emblemImage);
+        // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+        const pdfBytes = await pdfDoc.save();
+        // const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
+        //   res.arrayBuffer()
+        // );
+        download(
+          pdfBytes,
+          "pdf-lib_form_creation_example.pdf",
+          "application/pdf"
+        );
       }
     });
   };
@@ -870,41 +966,9 @@ function Annotation() {
 
   async function savePDF() {
     // pdf.savePdf();
-    if (signfabricObj) {
-      signfabricObj.remove(sign);
-    }
-    if (sign) {
-      const emblemUrl = "/signfield.png";
-      const emblemImageBytes = await fetch(emblemUrl).then((res) =>
-        res.arrayBuffer()
-      );
-      const pdfDoc = await PDFDocument.load(pdfUrl);
-      const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
-      const pages = pdfDoc.getPages();
-
-      // Get the form so we can add fields to it
-      const form = pdfDoc.getForm();
-      const button = form.createButton("sign");
-      button.addToPage("content", pages[0], {
-        x: left,
-        y: top,
-      });
-      console.log(left, "left");
-      console.log(top, "top");
-      button.setImage(emblemImage);
-      // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
-      const pdfBytes = await pdfDoc.save();
-      download(
-        pdfBytes,
-        "pdf-lib_form_creation_example.pdf",
-        "application/pdf"
-      );
-      // pdf.savePdf(pdfDataUri); // save with given file name
-    } else {
-      let b64 = new Buffer.from(pdfUrl).toString("base64");
-      // console.log(b64, "b64");
-      pdf.savePdf(b64); // save with given file name
-    }
+    let b64 = new Buffer.from(pdfUrl).toString("base64");
+    // console.log(b64, "b64");
+    pdf.savePdf(b64); // save with given file name
   }
 
   function clearPage() {
@@ -1107,7 +1171,7 @@ function Annotation() {
               Add sign
             </button>
           </div>
-          {/* <div className="tool">
+          <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => {
@@ -1116,7 +1180,7 @@ function Annotation() {
             >
               Confirm sign
             </button>
-          </div> */}
+          </div>
           <div className="tool">
             <button
               className="btn btn-danger btn-sm"
