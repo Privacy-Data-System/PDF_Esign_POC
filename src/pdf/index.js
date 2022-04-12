@@ -1225,7 +1225,25 @@ function Annotation() {
             </button>
           </div>
         </div>
-        <h1>Signature Pad Example</h1>
+        <div className="sideNav">
+          <div className="tool">
+            <button className="btn btn-info">test@info.com</button>
+          </div>
+          <div className="tool">
+            <button className="btn btn-light">testgmail@gmail.com</button>
+          </div>
+          <div className="tool">
+            <button
+              className="btn btn-primary"
+              onClick={(e) => {
+                addSign(e);
+              }}
+            >
+              Add sign
+            </button>
+          </div>
+        </div>
+        {/* <h1>Signature Pad Example</h1> */}
         {/* <Popup
           modal
           trigger={<button>Open Signature Pad</button>}
