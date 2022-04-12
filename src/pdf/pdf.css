@@ -18,7 +18,7 @@ body {
     left: 0;
     z-index: 10;
   }
-  .sidNav{
+  .sideNav{
     position: sticky;
     top: 50px;
     z-index: 100;

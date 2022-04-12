@@ -17,13 +17,16 @@ const download = require("downloadjs");
 
 var pdf;
 var rect;
-var sign;
-var signfabricObj;
-var left, top;
+var esigngroup = {};
+var signfabricObj = {};
+var left = {},
+  top = {};
 var pdf2;
+var a;
 function Annotation() {
-  const [file, setFile] = useState();
+  const [signsAdd, setSignsAdd] = useState(false);
   const [pencilTool, setPencilTool] = useState();
+  const [selectedMail, setSelectedMail] = useState("");
   const [openSignPad, setopenSignPad] = useState(false);
   const [openEsign, setOpenEsign] = useState(false);
   const [imageURL, setImageURL] = useState(null); // create a state that will contain our image url
@@ -56,7 +59,7 @@ function Annotation() {
   };
   const { state: pdfUrl } = location || {};
 
-  const [statePdfUrl, setStatePdfUrl] = useState(pdfUrl);
+  // const [statePdfUrl, setStatePdfUrl] = useState(pdfUrl);
   useEffect(() => {
     (async () => {
       const emblemUrl = "https://pdf-lib.js.org/assets/mario_emblem.png";
@@ -511,7 +514,12 @@ function Annotation() {
 
   PDFAnnotate.prototype.confirmSign = async function (fileName) {
     var inst = this;
-    signfabricObj.remove(sign);
+    if (Object.keys(signfabricObj) && Object.keys(signfabricObj).length > 0) {
+      Object.keys(signfabricObj).forEach((e) => {
+        signfabricObj[e].remove(esigngroup[e]);
+      });
+    }
+    // signfabricObj.remove(sign);
     var doc = new window.jspdf.jsPDF();
     if (typeof fileName === "undefined") {
       fileName = `${new Date().getTime()}.pdf`;
@@ -548,14 +556,34 @@ function Annotation() {
         const pages = pdfDoc.getPages();
 
         // Get the form so we can add fields to it
+        console.log(pages[0].getWidth(), "width");
+        console.log(pages[0].getHeight(), "height");
         const form = pdfDoc.getForm();
-        const button = form.createButton("sign");
-        button.addToPage("content", pages[0], {
-          x: left,
-          y: top,
-        });
+        if (
+          Object.keys(signfabricObj) &&
+          Object.keys(signfabricObj).length > 0
+        ) {
+          Object.keys(signfabricObj).forEach((each) => {
+            const button = form.createButton(`sign.${each}`);
+            button.addToPage("content", pages[0], {
+              x: pages[0].getWidth() - 3 * left[each],
+              y: pages[0].getHeight() - top[each],
+            });
+            console.log(left[each], " left[each]");
+            console.log(top[each], "top[each]");
 
-        button.setImage(emblemImage);
+            console.log(
+              pages[0].getWidth() - 3 * left[each],
+              "pages[0].getWidth() - 3 * left[each]"
+            );
+            console.log(
+              pages[0].getHeight() - top[each],
+              "pages[0].getHeight() - top[each]"
+            );
+
+            button.setImage(emblemImage);
+          });
+        }
         const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
         // const pdfBytes = await pdfDoc.save();
         const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
@@ -578,9 +606,14 @@ function Annotation() {
 
     // statePdfUrl(emblempdfBytes);
   };
-  PDFAnnotate.prototype.addsign = function () {
+  PDFAnnotate.prototype.addsign = function (selectedMail) {
     var inst = this;
-    signfabricObj = inst.fabricObjects[inst.active_canvas];
+
+    signfabricObj[selectedMail] = {};
+    left[selectedMail] = 0;
+    top[selectedMail] = 0;
+    esigngroup[selectedMail] = {};
+    let signfabricObjs = inst.fabricObjects[inst.active_canvas];
     inst.active_tool = 4;
     if (inst.fabricObjects.length > 0) {
       inst.fabricObjects.forEach((fabricObj, index) => {
@@ -588,27 +621,38 @@ function Annotation() {
       });
     }
 
-    sign = new fabric.Rect({
-      width: 100,
-      height: 100,
+    var text = new fabric.Text(`signature.${selectedMail}`, {
+      fontFamily: "Comic Sans",
+    });
+    let sign = new fabric.Rect({
+      width: text.width,
+      height: text.height,
       fill: inst.color,
       stroke: inst.borderColor,
       strokeSize: inst.borderSize,
     });
-    signfabricObj?.add(sign);
-    console.log(signfabricObj, "fabricObj");
+    var group = new fabric.Group([text, sign], {
+      // left: 100,
+      // top: 25,
+    });
+    esigngroup[selectedMail] = group;
+    signfabricObjs?.add(group);
+    console.log(group, "group");
 
-    var moveHandler = function (evt) {
+    let moveHandler = function (evt) {
       var movingObject = evt.target;
-      left = movingObject.get("left");
-      top = movingObject.get("top");
+
+      left[a] = movingObject.get("left");
+      top[a] = movingObject.get("top");
       console.log(movingObject.get("left"), movingObject.get("top"));
     };
-    signfabricObj.on("object:moving", moveHandler);
-    // fabricObj.on("drop", onDrop, false);
-    // function onDrop() {
-    //   console.log("onDrop");
-    // }
+    signfabricObjs.on("object:moving", (e) => {
+      moveHandler(e);
+    });
+    signfabricObjs.on("mouse:down", (e) => {
+      a = selectedMail;
+    });
+    signfabricObj[selectedMail] = signfabricObjs;
   };
 
   PDFAnnotate.prototype.enableAddArrow = function () {
@@ -794,12 +838,20 @@ function Annotation() {
         const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
         const pages = pdfDoc.getPages();
         const form = pdfDoc.getForm();
-        const button = form.createButton("sign");
-        button.addToPage("content", pages[0], {
-          x: left,
-          y: top,
-        });
-        button.setImage(emblemImage);
+        if (
+          Object.keys(signfabricObj) &&
+          Object.keys(signfabricObj).length > 0
+        ) {
+          Object.keys(signfabricObj).forEach((each) => {
+            const button = form.createButton(`sign.${each}`);
+            button.addToPage("content", pages[0], {
+              x: left[each],
+              y: top[each],
+            });
+
+            button.setImage(emblemImage);
+          });
+        }
         // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
         const pdfBytes = await pdfDoc.save();
         // const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
@@ -921,7 +973,7 @@ function Annotation() {
   function addSign() {
     pdf.setColor("rgba(255, 0, 0, 0.3)");
     pdf.setBorderColor("blue");
-    pdf.addsign();
+    pdf.addsign(selectedMail);
   }
   function confirmSign() {
     pdf.confirmSign();
@@ -1161,7 +1213,7 @@ function Annotation() {
               ></i>
             </button>
           </div>
-          <div className="tool">
+          {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => {
@@ -1180,7 +1232,7 @@ function Annotation() {
             >
               Confirm sign
             </button>
-          </div>
+          </div> */}
           <div className="tool">
             <button
               className="btn btn-danger btn-sm"
@@ -1227,19 +1279,54 @@ function Annotation() {
         </div>
         <div className="sideNav">
           <div className="tool">
-            <button className="btn btn-info">test@info.com</button>
+            {selectedMail === "test@info.com" ? (
+              <button className="btn btn-info">test@info.com</button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  setSelectedMail("test@info.com");
+                }}
+                className="btn btn-light"
+              >
+                test@info.com
+              </button>
+            )}
           </div>
           <div className="tool">
-            <button className="btn btn-light">testgmail@gmail.com</button>
+            {selectedMail === "testgmail@gmail.com" ? (
+              <button className="btn btn-info">testgmail@gmail.com</button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  setSelectedMail("testgmail@gmail.com");
+                }}
+                className="btn btn-light"
+              >
+                testgmail@gmail.com
+              </button>
+            )}
           </div>
           <div className="tool">
             <button
               className="btn btn-primary"
               onClick={(e) => {
                 addSign(e);
+                setSignsAdd(true);
               }}
+              disabled={selectedMail ? "" : "disabled"}
             >
               Add sign
+            </button>
+          </div>
+          <div className="tool">
+            <button
+              className="btn btn-info btn-sm"
+              onClick={(e) => {
+                confirmSign(e);
+              }}
+              disabled={signsAdd ? "" : "disabled"}
+            >
+              Confirm sign
             </button>
           </div>
         </div>
