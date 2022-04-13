@@ -20,7 +20,12 @@ var rect;
 var sign;
 var signfabricObj;
 var left, top;
+var mail;
 function Annotation() {
+  if (!mail) {
+    mail = prompt("Please enter your mail");
+    console.log(mail);
+  }
   const [file, setFile] = useState();
   const [pencilTool, setPencilTool] = useState();
   const [openSignPad, setopenSignPad] = useState(false);
@@ -54,62 +59,6 @@ function Annotation() {
     // console.log(imageURL?.length, ":imageURL?.length");
   };
   const { state: pdfUrl } = location || {};
-
-  useEffect(() => {
-    (async () => {
-      const emblemUrl = "https://pdf-lib.js.org/assets/mario_emblem.png";
-      const emblemImageBytes = await fetch(emblemUrl).then((res) =>
-        res.arrayBuffer()
-      );
-      const pdfDoc = await PDFDocument.load(pdfUrl);
-      const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
-      const pages = pdfDoc.getPages();
-      const firstPage = pages[0];
-
-      // const page = pdfDoc.addPage([550, 750])
-
-      // Get the form so we can add fields to it
-      const form = pdfDoc.getForm();
-      const button = form.createButton("cool");
-
-      // const field = form.getField("favorite.superhero");
-      // field.disableReadOnly();
-      // const superheroField = form.createTextField("favorite.superhero");
-      // superheroField.setText("One Punch Man");
-      // superheroField.addToPage(firstPage, { x: 55, y: 640 });
-      button.addToPage("content", pages[0], {
-        x: 80,
-        y: 540,
-      });
-      // button.setImage(emblemImage);
-      // const helloWorldScript =
-      //   'console.show(); console.println("Hello World!");';
-      // button.acroField.getWidgets().forEach((widget) => {
-      //   widget.dict.set(
-      //     PDFName.of("AA"),
-      //     pdfDoc.context.obj({
-      //       U: {
-      //         Type: "Action",
-      //         S: "JavaScript",
-      //         JS: PDFHexString.fromText(helloWorldScript),
-      //       },
-      //     })
-      //   );
-      // });
-      // const checkBox = form.getCheckBox("gundam.exia");
-      // if (checkBox.isChecked()) console.log("check box is selected");
-
-      const pdfBytes = await pdfDoc.save();
-      // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
-      // setTimeout(() => {
-      //   download(
-      //     pdfBytes,
-      //     "pdf-lib_form_creation_example.pdf",
-      //     "application/pdf"
-      //   );
-      // }, 5000);
-    })();
-  }, []);
   //Fabric Arrow Script //
   fabric.LineArrow = fabric.util.createClass(fabric.Line, {
     type: "lineArrow",
@@ -512,12 +461,10 @@ function Annotation() {
     const pdfDoc = await PDFDocument.load(pdfUrl);
     const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
     const form = pdfDoc.getForm();
-    const fields = form.getFields();
-    fields.forEach((field) => {
-      const name = field.getName();
-      const button = form.getButton(name);
-      button.setImage(emblemImage);
-    });
+
+    const button = form.getButton(`sign.${mail}`);
+    button.setImage(emblemImage);
+
     const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
     const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
       res.arrayBuffer()
@@ -818,16 +765,37 @@ function Annotation() {
 
   // pdf = !pdf
   if (!pdf) {
-    pdf = new PDFAnnotate("pdf-container", pdfUrl, {
-      onPageUpdated(page, oldData, newData) {
-        // console.log(page, oldData, newData);
-      },
-      ready() {
-        // console.log("Plugin initialized successfully");
-      },
-      // scale: 1,
-      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
-    });
+    (async function () {
+      const emblemUrl = "/signfielddisable.png";
+      const emblemImageBytes = await fetch(emblemUrl).then((res) =>
+        res.arrayBuffer()
+      );
+      const pdfDoc = await PDFDocument.load(pdfUrl);
+      const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
+      const form = pdfDoc.getForm();
+      const fields = form.getFields();
+      fields.forEach((field) => {
+        const name = field.getName();
+        if (name !== `sign.${mail}`) {
+          const button = form.getButton(name);
+          button.setImage(emblemImage);
+        }
+      });
+      const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+      const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
+        res.arrayBuffer()
+      );
+      pdf = new PDFAnnotate("pdf-container", emblempdfBytes, {
+        onPageUpdated(page, oldData, newData) {
+          // console.log(page, oldData, newData);
+        },
+        ready() {
+          // console.log("Plugin initialized successfully");
+        },
+        // scale: 1,
+        pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+      });
+    })();
   }
   // console.log(pdf, "pdfco");
 

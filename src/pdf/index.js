@@ -566,7 +566,7 @@ function Annotation() {
           Object.keys(signfabricObj).forEach((each) => {
             const button = form.createButton(`sign.${each}`);
             button.addToPage("content", pages[0], {
-              x: pages[0].getWidth() - 3 * left[each],
+              x: pages[0].getWidth() - left[each],
               y: pages[0].getHeight() - top[each],
             });
             console.log(left[each], " left[each]");
@@ -623,6 +623,7 @@ function Annotation() {
 
     var text = new fabric.Text(`signature.${selectedMail}`, {
       fontFamily: "Comic Sans",
+      fontSize: 25,
     });
     let sign = new fabric.Rect({
       width: text.width,
@@ -845,8 +846,8 @@ function Annotation() {
           Object.keys(signfabricObj).forEach((each) => {
             const button = form.createButton(`sign.${each}`);
             button.addToPage("content", pages[0], {
-              x: left[each],
-              y: top[each],
+              x: pages[0].getWidth() - left[each],
+              y: pages[0].getHeight() - top[each],
             });
 
             button.setImage(emblemImage);
@@ -1025,6 +1026,16 @@ function Annotation() {
 
   function clearPage() {
     pdf.clearActivePage();
+    pdf = new PDFAnnotate("pdf-container", pdfUrl, {
+      onPageUpdated(page, oldData, newData) {
+        // console.log(page, oldData, newData);
+      },
+      ready() {
+        // console.log("Plugin initialized successfully");
+      },
+      // scale: 1,
+      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+    });
     setImageURL(null);
   }
 
@@ -1279,30 +1290,30 @@ function Annotation() {
         </div>
         <div className="sideNav">
           <div className="tool">
-            {selectedMail === "test@info.com" ? (
-              <button className="btn btn-info">test@info.com</button>
+            {selectedMail === "user1@info.com" ? (
+              <button className="btn btn-info">user1@info.com</button>
             ) : (
               <button
                 onClick={(e) => {
-                  setSelectedMail("test@info.com");
+                  setSelectedMail("user1@info.com");
                 }}
                 className="btn btn-light"
               >
-                test@info.com
+                user1@info.com
               </button>
             )}
           </div>
           <div className="tool">
-            {selectedMail === "testgmail@gmail.com" ? (
-              <button className="btn btn-info">testgmail@gmail.com</button>
+            {selectedMail === "user2@info.com" ? (
+              <button className="btn btn-info">user2@info.com</button>
             ) : (
               <button
                 onClick={(e) => {
-                  setSelectedMail("testgmail@gmail.com");
+                  setSelectedMail("user2@info.com");
                 }}
                 className="btn btn-light"
               >
-                testgmail@gmail.com
+                user2@info.com
               </button>
             )}
           </div>
