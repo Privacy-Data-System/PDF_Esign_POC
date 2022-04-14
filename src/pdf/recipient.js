@@ -21,6 +21,8 @@ var sign;
 var signfabricObj;
 var left, top;
 var mail;
+var isSignd;
+var afterSignEmblempdfBytes;
 function Annotation() {
   if (!mail) {
     mail = prompt("Please enter your mail");
@@ -469,6 +471,9 @@ function Annotation() {
     const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
       res.arrayBuffer()
     );
+    const pdfBytes = await pdfDoc.save();
+    isSignd = true;
+    afterSignEmblempdfBytes = pdfBytes;
     pdf = null;
     pdf = new PDFAnnotate("pdf-container", emblempdfBytes, {
       onPageUpdated(page, oldData, newData) {
@@ -776,9 +781,11 @@ function Annotation() {
       const fields = form.getFields();
       fields.forEach((field) => {
         const name = field.getName();
-        if (name !== `sign.${mail}`) {
-          const button = form.getButton(name);
-          button.setImage(emblemImage);
+        if (mail !== "user2@info.com") {
+          if (name !== `sign.${mail}`) {
+            const button = form.getButton(name);
+            button.setImage(emblemImage);
+          }
         }
       });
       const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
@@ -899,7 +906,22 @@ function Annotation() {
     } else {
       let b64 = new Buffer.from(pdfUrl).toString("base64");
       // console.log(b64, "b64");
-      pdf.savePdf(b64); // save with given file name
+      if (isSignd) {
+        download(
+          afterSignEmblempdfBytes,
+          "pdf-lib_form_creation_example.pdf",
+          "application/pdf"
+        );
+      } else {
+        const pdfDoc = await PDFDocument.load(pdfUrl);
+        const pdfBytes = await pdfDoc.save();
+        download(
+          pdfBytes,
+          "pdf-lib_form_creation_example.pdf",
+          "application/pdf"
+        );
+      }
+      // pdf.savePdf(b64); // save with given file name
     }
   }
 
