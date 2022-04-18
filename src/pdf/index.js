@@ -21,6 +21,8 @@ var esigngroup = {};
 var signfabricObj = {};
 var left = {},
   top = {};
+var eleHeight = {},
+  eleWidth = {};
 var pdf2;
 var a;
 function Annotation() {
@@ -566,11 +568,20 @@ function Annotation() {
           Object.keys(signfabricObj).forEach((each) => {
             const button = form.createButton(`sign.${each}`);
             button.addToPage("content", pages[0], {
-              x: pages[0].getWidth() - left[each],
-              y: pages[0].getHeight() - top[each],
+              x: left[each] > 0 ? left[each] : 0,
+              y:
+                left[each] > 0
+                  ? pages[0].getHeight() - top[each]
+                  : pages[0].getHeight() - 44,
             });
-            console.log(left[each], " left[each]");
-            console.log(top[each], "top[each]");
+
+            console.log(
+              left[each] > 0
+                ? pages[0].getHeight() - top[each]
+                : pages[0].getHeight() - 44,
+              "y"
+            );
+            console.log(left[each] > 0 ? left[each] : 0, "x");
 
             console.log(
               pages[0].getWidth() - 3 * left[each],
@@ -612,6 +623,8 @@ function Annotation() {
     signfabricObj[selectedMail] = {};
     left[selectedMail] = 0;
     top[selectedMail] = 0;
+    eleHeight[selectedMail] = 0;
+    eleWidth[selectedMail] = 0;
     esigngroup[selectedMail] = {};
     let signfabricObjs = inst.fabricObjects[inst.active_canvas];
     inst.active_tool = 4;
@@ -642,9 +655,11 @@ function Annotation() {
 
     let moveHandler = function (evt) {
       var movingObject = evt.target;
-
+      console.log(movingObject, "movingObject");
       left[a] = movingObject.get("left");
       top[a] = movingObject.get("top");
+      eleHeight[a] = movingObject.height;
+      eleWidth[a] = movingObject.width;
       console.log(movingObject.get("left"), movingObject.get("top"));
     };
     signfabricObjs.on("object:moving", (e) => {
@@ -846,8 +861,11 @@ function Annotation() {
           Object.keys(signfabricObj).forEach((each) => {
             const button = form.createButton(`sign.${each}`);
             button.addToPage("content", pages[0], {
-              x: pages[0].getWidth() - left[each],
-              y: pages[0].getHeight() - top[each],
+              x: left[each] > 0 ? left[each] : 0,
+              y:
+                left[each] > 0
+                  ? pages[0].getHeight() - top[each]
+                  : pages[0].getHeight() - 44,
             });
 
             button.setImage(emblemImage);
