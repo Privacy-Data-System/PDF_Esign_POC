@@ -448,7 +448,7 @@ function Annotation() {
       ready() {
         // console.log("Plugin initialized successfully");
       },
-      // scale: 1,
+      scale: 1.1,
       pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
     var inst = this;
@@ -570,15 +570,18 @@ function Annotation() {
             button.addToPage("content", pages[0], {
               x: left[each] > 0 ? left[each] : 0,
               y:
-                left[each] > 0
+                top[each] > 0
                   ? pages[0].getHeight() - top[each]
                   : pages[0].getHeight() - 44,
             });
 
+            console.log(left[each], "left[each]");
+            console.log(top[each], "top[each]");
             console.log(
-              left[each] > 0
-                ? pages[0].getHeight() - top[each]
-                : pages[0].getHeight() - 44,
+              top[each] > 0
+                ? pages[0].getHeight() -
+                    (top[each] > 615 ? top[each] - 40 : top[each] - 40)
+                : pages[0].getHeight() - 40,
               "y"
             );
             console.log(left[each] > 0 ? left[each] : 0, "x");
@@ -609,7 +612,7 @@ function Annotation() {
           ready() {
             // console.log("Plugin initialized successfully");
           },
-          // scale: 1,
+          scale: 1.1,
           pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
         });
       }
@@ -863,7 +866,7 @@ function Annotation() {
             button.addToPage("content", pages[0], {
               x: left[each] > 0 ? left[each] : 0,
               y:
-                left[each] > 0
+                top[each] > 0
                   ? pages[0].getHeight() - top[each]
                   : pages[0].getHeight() - 44,
             });
@@ -964,7 +967,7 @@ function Annotation() {
       ready() {
         // console.log("Plugin initialized successfully");
       },
-      // scale: 1,
+      scale: 1.1,
       pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
   }
@@ -1051,7 +1054,7 @@ function Annotation() {
       ready() {
         // console.log("Plugin initialized successfully");
       },
-      // scale: 1,
+      scale: 1.1,
       pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
     });
     setImageURL(null);
