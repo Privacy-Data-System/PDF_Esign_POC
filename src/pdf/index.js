@@ -568,10 +568,17 @@ function Annotation() {
           Object.keys(signfabricObj).forEach((each) => {
             const button = form.createButton(`sign.${each}`);
             button.addToPage("content", pages[0], {
-              x: left[each] > 0 ? left[each] : 0,
+              x:
+                left[each] > 0
+                  ? left[each] >= pages[0].getWidth()
+                    ? pages[0].getWidth() - 110
+                    : left[each]
+                  : 0,
               y:
                 top[each] > 0
-                  ? pages[0].getHeight() - top[each]
+                  ? top[each] >= pages[0].getHeight()
+                    ? 0
+                    : pages[0].getHeight() - top[each]
                   : pages[0].getHeight() - 44,
             });
 
