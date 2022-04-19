@@ -12,7 +12,8 @@ import { Buffer } from "buffer";
 import "./sigCanvas.css";
 import { Button } from "@material-ui/core";
 import BasicTabs from "./eSingnature";
-import { PDFDocument, PDFName, PDFHexString } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
+import mark from "./download.jpg";
 const download = require("downloadjs");
 
 var pdf;
@@ -63,60 +64,81 @@ function Annotation() {
 
   // const [statePdfUrl, setStatePdfUrl] = useState(pdfUrl);
   useEffect(() => {
-    (async () => {
-      const emblemUrl = "https://pdf-lib.js.org/assets/mario_emblem.png";
-      const emblemImageBytes = await fetch(emblemUrl).then((res) =>
-        res.arrayBuffer()
-      );
-      const pdfDoc = await PDFDocument.load(pdfUrl);
-      const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
-      const pages = pdfDoc.getPages();
-      const firstPage = pages[0];
-
-      // const page = pdfDoc.addPage([550, 750])
-
-      // Get the form so we can add fields to it
-      const form = pdfDoc.getForm();
-      const button = form.createButton("cool");
-
-      // const field = form.getField("favorite.superhero");
-      // field.disableReadOnly();
-      // const superheroField = form.createTextField("favorite.superhero");
-      // superheroField.setText("One Punch Man");
-      // superheroField.addToPage(firstPage, { x: 55, y: 640 });
-      button.addToPage("content", pages[0], {
-        x: 80,
-        y: 540,
-      });
-      // button.setImage(emblemImage);
-      // const helloWorldScript =
-      //   'console.show(); console.println("Hello World!");';
-      // button.acroField.getWidgets().forEach((widget) => {
-      //   widget.dict.set(
-      //     PDFName.of("AA"),
-      //     pdfDoc.context.obj({
-      //       U: {
-      //         Type: "Action",
-      //         S: "JavaScript",
-      //         JS: PDFHexString.fromText(helloWorldScript),
-      //       },
-      //     })
-      //   );
-      // });
-      // const checkBox = form.getCheckBox("gundam.exia");
-      // if (checkBox.isChecked()) console.log("check box is selected");
-
-      const pdfBytes = await pdfDoc.save();
-      // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
-      // setTimeout(() => {
-      //   download(
-      //     pdfBytes,
-      //     "pdf-lib_form_creation_example.pdf",
-      //     "application/pdf"
-      //   );
-      // }, 5000);
-    })();
+    // document.getElementById("watermark").src = mark;
+    // (async () => {
+    //   const emblemUrl = "https://pdf-lib.js.org/assets/mario_emblem.png";
+    //   const emblemImageBytes = await fetch(emblemUrl).then((res) =>
+    //     res.arrayBuffer()
+    //   );
+    //   const pdfDoc = await PDFDocument.load(pdfUrl);
+    //   const emblemImage = await pdfDoc.embedPng(emblemImageBytes);
+    //   const pages = pdfDoc.getPages();
+    //   const firstPage = pages[0];
+    //   // const page = pdfDoc.addPage([550, 750])
+    //   // Get the form so we can add fields to it
+    //   const form = pdfDoc.getForm();
+    //   const button = form.createButton("cool");
+    //   // const field = form.getField("favorite.superhero");
+    //   // field.disableReadOnly();
+    //   // const superheroField = form.createTextField("favorite.superhero");
+    //   // superheroField.setText("One Punch Man");
+    //   // superheroField.addToPage(firstPage, { x: 55, y: 640 });
+    //   button.addToPage("content", pages[0], {
+    //     x: 80,
+    //     y: 540,
+    //   });
+    //   // button.setImage(emblemImage);
+    //   // const helloWorldScript =
+    //   //   'console.show(); console.println("Hello World!");';
+    //   // button.acroField.getWidgets().forEach((widget) => {
+    //   //   widget.dict.set(
+    //   //     PDFName.of("AA"),
+    //   //     pdfDoc.context.obj({
+    //   //       U: {
+    //   //         Type: "Action",
+    //   //         S: "JavaScript",
+    //   //         JS: PDFHexString.fromText(helloWorldScript),
+    //   //       },
+    //   //     })
+    //   //   );
+    //   // });
+    //   // const checkBox = form.getCheckBox("gundam.exia");
+    //   // if (checkBox.isChecked()) console.log("check box is selected");
+    //   const pdfBytes = await pdfDoc.save();
+    //   // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+    //   // setTimeout(() => {
+    //   //   download(
+    //   //     pdfBytes,
+    //   //     "pdf-lib_form_creation_example.pdf",
+    //   //     "application/pdf"
+    //   //   );
+    //   // }, 5000);
+    // })();
   }, []);
+
+  function createWaterMark(ctx, img, signfabricObjs) {
+    var patternCanvas = document.createElement("canvas"),
+      patternContext = patternCanvas.getContext("2d");
+    if (ctx && img.width > 0) {
+      const width = img.width,
+        height = img.height;
+      patternCanvas.width = width;
+      patternCanvas.height = height;
+      patternContext.drawImage(img, 0, 0);
+      console.log(img.width);
+      console.log(patternCanvas);
+
+      const pattern = ctx.createPattern(patternCanvas, "no-repeat");
+      ctx.save();
+      ctx.rotate(-0.25 * Math.PI);
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = pattern;
+      // ctx.translate(0, signfabricObjs.height / 1.7);
+      ctx.translate(-325, signfabricObjs.height / 2 + 60);
+      ctx.fillRect(0, 0, signfabricObjs.width, signfabricObjs.height);
+      ctx.restore();
+    }
+  }
   //Fabric Arrow Script //
   fabric.LineArrow = fabric.util.createClass(fabric.Line, {
     type: "lineArrow",
@@ -379,6 +401,31 @@ function Annotation() {
           options.ready();
         }
       });
+      console.log(inst.fabricObjects, "inst");
+
+      /// for water mark
+      inst.fabricObjects.forEach((signfabricObjs, i) => {
+        console.log(signfabricObjs, "signfabricObjs");
+        let ctx = signfabricObjs.getContext("2d");
+        let placeHolder = "Cashapona";
+        let tCtx = document.createElement("canvas").getContext("2d");
+        tCtx.canvas.width =
+          tCtx.measureText(placeHolder).width + 100 * placeHolder.length;
+        tCtx.font = "bold 100px verdana, sans-serif";
+        tCtx.fillStyle = "#ff0000";
+        tCtx.fillText(placeHolder, 0, 100);
+        var img = document.getElementById("watermark");
+        img.src = tCtx.canvas.toDataURL();
+        setTimeout(() => {
+          createWaterMark(ctx, img, signfabricObjs);
+          createWaterMark(ctx, img, signfabricObjs);
+          signfabricObjs.on("after:render", (e) => {
+            let { ctx } = e;
+            createWaterMark(ctx, img, signfabricObjs);
+            createWaterMark(ctx, img, signfabricObjs);
+          });
+        }, 5000);
+      });
     };
     // console.log(inst, "inst");
     inst.fabricClickHandler = function (event, fabricObj) {
@@ -627,6 +674,30 @@ function Annotation() {
 
     // statePdfUrl(emblempdfBytes);
   };
+  PDFAnnotate.prototype.removeWaterMarkOnPage = function () {
+    var inst = this;
+    let signfabricObjs = inst.fabricObjects[inst.active_canvas].getObjects();
+    console.log(signfabricObjs, "signfabricObjs");
+  };
+
+  PDFAnnotate.prototype.addWaterMarkOnPage = function () {
+    var inst = this;
+    let signfabricObjs = inst.fabricObjects[inst.active_canvas];
+    console.log(signfabricObjs, "signfabricObjs");
+    var ctx = signfabricObjs.getContext("2d");
+    var placeHolder = "PDS";
+    var tCtx = document.createElement("canvas").getContext("2d");
+    tCtx.canvas.width =
+      tCtx.measureText(placeHolder).width + 100 * placeHolder.length;
+    tCtx.font = "bold 100px verdana, sans-serif";
+    tCtx.fillStyle = "#ff0000";
+    tCtx.fillText(placeHolder, 0, 100);
+    signfabricObjs.on("after:render", (e) => {
+      let { ctx } = e;
+    });
+    createWaterMark(ctx, tCtx, signfabricObjs);
+  };
+
   PDFAnnotate.prototype.addsign = function (selectedMail) {
     var inst = this;
 
@@ -722,13 +793,13 @@ function Annotation() {
           var reader = new FileReader();
           reader.addEventListener(
             "load",
-            function () {
+            function (imageURL) {
               // inputElement.remove();
               var image = new Image();
               image.onload = function () {
                 fabricObj?.add(new fabric.Image(image));
               };
-              image.src = imageURL;
+              image.src = imageURL.target.result;
             },
             false
           );
@@ -1044,6 +1115,14 @@ function Annotation() {
     event?.preventDefault();
     pdf.deleteSelectedObject();
   }
+  function addWaterMark(event) {
+    event?.preventDefault();
+    pdf.addWaterMarkOnPage();
+  }
+  function removeWaterMark(event) {
+    event?.preventDefault();
+    pdf.removeWaterMarkOnPage();
+  }
 
   async function savePDF() {
     // pdf.savePdf();
@@ -1303,7 +1382,20 @@ function Annotation() {
             </button>
           </div> */}
           <div className="tool">
-            <button className="btn btn-info btn-sm">{}</button>
+            <button
+              className="btn btn-info btn-sm"
+              onClick={(e) => addWaterMark(e)}
+            >
+              Add Water Mark
+            </button>
+          </div>
+          <div className="tool">
+            <button
+              className="btn btn-info btn-sm"
+              onClick={(e) => removeWaterMark(e)}
+            >
+              Remove Water Mark
+            </button>
           </div>
           <div className="tool">
             <button
