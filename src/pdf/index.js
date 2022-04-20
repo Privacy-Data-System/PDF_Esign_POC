@@ -134,7 +134,7 @@ function Annotation() {
       ctx.globalAlpha = 0.2;
       ctx.fillStyle = pattern;
       // ctx.translate(0, signfabricObjs.height / 1.7);
-      ctx.translate(-325, signfabricObjs.height / 2 + 60);
+      ctx.translate(-400, signfabricObjs.height / 2 + 60);
       ctx.fillRect(0, 0, signfabricObjs.width, signfabricObjs.height);
       ctx.restore();
     }
@@ -407,11 +407,11 @@ function Annotation() {
       inst.fabricObjects.forEach((signfabricObjs, i) => {
         console.log(signfabricObjs, "signfabricObjs");
         let ctx = signfabricObjs.getContext("2d");
-        let placeHolder = "Cashapona";
+        let placeHolder = "Sendit Certified";
         let tCtx = document.createElement("canvas").getContext("2d");
         tCtx.canvas.width =
           tCtx.measureText(placeHolder).width + 100 * placeHolder.length;
-        tCtx.font = "bold 100px verdana, sans-serif";
+        tCtx.font = "bold 70px verdana, sans-serif";
         tCtx.fillStyle = "#ff0000";
         tCtx.fillText(placeHolder, 0, 100);
         var img = document.getElementById("watermark");
@@ -1381,22 +1381,22 @@ function Annotation() {
               e-Signature
             </button>
           </div> */}
-          <div className="tool">
+          {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => addWaterMark(e)}
             >
               Add Water Mark
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => removeWaterMark(e)}
             >
               Remove Water Mark
-            </button>
-          </div>
+            </button> 
+           </div> */}
           <div className="tool">
             <button
               className="btn btn-light btn-sm"
