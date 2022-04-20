@@ -19,13 +19,22 @@ const download = require("downloadjs");
 var pdf;
 var rect;
 var esigngroup = {};
+var checkgroup = {};
 var signfabricObj = {};
+var checkfabricObj = {};
 var left = {},
   top = {};
 var eleHeight = {},
   eleWidth = {};
 var pdf2;
 var a;
+var r;
+var radioleft = {},
+  radiotop = {};
+var c;
+var checkleft = {},
+  checktop = {};
+
 function Annotation() {
   const [signsAdd, setSignsAdd] = useState(false);
   const [pencilTool, setPencilTool] = useState();
@@ -125,8 +134,6 @@ function Annotation() {
       patternCanvas.width = width;
       patternCanvas.height = height;
       patternContext.drawImage(img, 0, 0);
-      console.log(img.width);
-      console.log(patternCanvas);
 
       const pattern = ctx.createPattern(patternCanvas, "no-repeat");
       ctx.save();
@@ -283,7 +290,7 @@ function Annotation() {
     container_id,
     Url,
     options = {},
-    showWatermark = false
+    showWaterMark = false
   ) {
     console.count("count PDF annote function");
     this.number_of_pages = 0;
@@ -409,7 +416,7 @@ function Annotation() {
       console.log(inst.fabricObjects, "inst");
 
       /// for water mark
-      if (showWatermark) {
+      if (showWaterMark) {
         inst.fabricObjects.forEach((signfabricObjs, i) => {
           console.log(signfabricObjs, "signfabricObjs");
           let ctx = signfabricObjs.getContext("2d");
@@ -424,10 +431,8 @@ function Annotation() {
           img.src = tCtx.canvas.toDataURL();
           setTimeout(() => {
             createWaterMark(ctx, img, signfabricObjs);
-            createWaterMark(ctx, img, signfabricObjs);
             signfabricObjs.on("after:render", (e) => {
               let { ctx } = e;
-              createWaterMark(ctx, img, signfabricObjs);
               createWaterMark(ctx, img, signfabricObjs);
             });
           }, 5000);
@@ -705,6 +710,191 @@ function Annotation() {
     createWaterMark(ctx, tCtx, signfabricObjs);
   };
 
+  PDFAnnotate.prototype.saveFields = function (fileName) {
+    var inst = this;
+    if (Object.keys(checkfabricObj) && Object.keys(checkfabricObj).length > 0) {
+      Object.keys(checkfabricObj).forEach((e) => {
+        checkfabricObj[e].remove(checkgroup[e]);
+      });
+    }
+    var doc = new window.jspdf.jsPDF();
+    if (typeof fileName === "undefined") {
+      fileName = `${new Date().getTime()}.pdf`;
+    }
+
+    console.log(inst.fabricObjects, "inst.fabricObjects");
+    inst.fabricObjects.forEach(async function (fabricObj, index) {
+      if (index !== 0) {
+        doc.addPage();
+        doc.setPage(index + 1);
+      }
+      doc.addImage(
+        fabricObj.toDataURL({
+          format: "png",
+        }),
+        inst.pageImageCompression === "NONE" ? "PNG" : "JPEG",
+        0,
+        0,
+        doc.internal.pageSize.getWidth(),
+        doc.internal.pageSize.getHeight(),
+        `page-${index + 1}`,
+        ["FAST", "MEDIUM", "SLOW"].indexOf(inst.pageImageCompression) >= 0
+          ? inst.pageImageCompression
+          : undefined
+      );
+      if (index === inst.fabricObjects.length - 1) {
+        let pdfArrayB = new Buffer.from(doc.output("arraybuffer"));
+
+        const pdfDoc = await PDFDocument.load(pdfArrayB);
+        const pages = pdfDoc.getPages();
+
+        // Get the form so we can add fields to it
+
+        const form = pdfDoc.getForm();
+        if (Object.keys(checktop) && Object.keys(checktop).length > 0) {
+          Object.keys(checktop).forEach((each) => {
+            const checkBox = form.createCheckBox(`check.${each}`);
+            checkBox.addToPage(pages[0], {
+              x:
+                checkleft[each] > 0
+                  ? checkleft[each] >= pages[0].getWidth()
+                    ? pages[0].getWidth() - 110
+                    : checkleft[each]
+                  : 0,
+              y:
+                checktop[each] > 0
+                  ? checktop[each] >= pages[0].getHeight()
+                    ? 0
+                    : pages[0].getHeight() - checktop[each]
+                  : pages[0].getHeight() - 44,
+              width: 25,
+              height: 25,
+            });
+          });
+        }
+        if (Object.keys(radiotop) && Object.keys(radiotop).length > 0) {
+          Object.keys(radiotop).forEach((each) => {
+            const radioGroup = form.createRadioGroup(`check.${each}`);
+            const options = {
+              x: 50,
+              width: 25,
+              height: 25,
+            };
+
+            radioGroup.addOptionToPage("Exia", pages[0], { ...options, y: 50 });
+            radioGroup.addOptionToPage("Dynames", pages[0], {
+              ...options,
+              y: 110,
+            });
+            // checkBox.addToPage(pages[0], {
+            //   x:
+            //     radioleft[each] > 0
+            //       ? radioleft[each] >= pages[0].getWidth()
+            //         ? pages[0].getWidth() - 110
+            //         : radioleft[each]
+            //       : 0,
+            //   y:
+            //     radiotop[each] > 0
+            //       ? radiotop[each] >= pages[0].getHeight()
+            //         ? 0
+            //         : pages[0].getHeight() - radiotop[each]
+            //       : pages[0].getHeight() - 44,
+            // });
+          });
+        }
+
+        const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
+        // const pdfBytes = await pdfDoc.save();
+        const emblempdfBytes = await fetch(pdfDataUri).then((res) =>
+          res.arrayBuffer()
+        );
+
+        pdf = null;
+        pdf = new PDFAnnotate("pdf-container", emblempdfBytes, {
+          onPageUpdated(page, oldData, newData) {
+            // console.log(page, oldData, newData);
+          },
+          ready() {
+            // console.log("Plugin initialized successfully");
+          },
+          scale: 1.1,
+          pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
+        });
+      }
+    });
+  };
+  PDFAnnotate.prototype.addCheckBox = function (checkBoxId) {
+    var inst = this;
+
+    checkfabricObj[checkBoxId] = {};
+    checkgroup[checkBoxId] = {};
+    let signfabricObjs = inst.fabricObjects[inst.active_canvas];
+    inst.active_tool = 4;
+    var text = new fabric.Text(`Check button`, {
+      fontFamily: "Comic Sans",
+      fontSize: 15,
+    });
+    let react = new fabric.Rect({
+      width: 50,
+      height: 50,
+      fill: inst.color,
+      stroke: inst.borderColor,
+      strokeSize: inst.borderSize,
+    });
+    var group = new fabric.Group([text, react], {});
+    checkgroup[checkBoxId] = group;
+    signfabricObjs?.add(group);
+    let moveHandler = function (evt) {
+      var movingObject = evt.target;
+      checkleft[c] = movingObject.get("left");
+      checktop[c] = movingObject.get("top");
+      console.log(movingObject.get("left"), movingObject.get("top"));
+    };
+    signfabricObjs.on("object:moving", (e) => {
+      moveHandler(e);
+    });
+    signfabricObjs.on("mouse:down", (e) => {
+      if (e.target) {
+        c = checkBoxId;
+      }
+    });
+    checkfabricObj[checkBoxId] = signfabricObjs;
+  };
+  PDFAnnotate.prototype.addradioBox = function (radioBoxId) {
+    var inst = this;
+    left[selectedMail] = 0;
+    top[selectedMail] = 0;
+    let signfabricObjs = inst.fabricObjects[inst.active_canvas];
+    inst.active_tool = 4;
+    var text = new fabric.Text(`radio box`, {
+      fontFamily: "Comic Sans",
+      fontSize: 15,
+    });
+    let react = new fabric.Rect({
+      width: 50,
+      height: 50,
+      fill: inst.color,
+      stroke: inst.borderColor,
+      strokeSize: inst.borderSize,
+    });
+    var group = new fabric.Group([text, react], {});
+    signfabricObjs?.add(group);
+    let moveHandler = function (evt) {
+      var movingObject = evt.target;
+      radioleft[r] = movingObject.get("left");
+      radiotop[r] = movingObject.get("top");
+      console.log(movingObject.get("left"), movingObject.get("top"));
+    };
+    signfabricObjs.on("object:moving", (e) => {
+      moveHandler(e);
+    });
+    signfabricObjs.on("mouse:down", (e) => {
+      if (e.target) {
+        console.log(e, "eeeeeee");
+        r = radioBoxId;
+      }
+    });
+  };
   PDFAnnotate.prototype.addsign = function (selectedMail) {
     var inst = this;
 
@@ -743,7 +933,6 @@ function Annotation() {
 
     let moveHandler = function (evt) {
       var movingObject = evt.target;
-      console.log(movingObject, "movingObject");
       left[a] = movingObject.get("left");
       top[a] = movingObject.get("top");
       eleHeight[a] = movingObject.height;
@@ -907,6 +1096,12 @@ function Annotation() {
 
   PDFAnnotate.prototype.savePdf = function (fileName) {
     var inst = this;
+    if (Object.keys(checkfabricObj) && Object.keys(checkfabricObj).length > 0) {
+      Object.keys(checkfabricObj).forEach((e) => {
+        checkfabricObj[e].remove(checkgroup[e]);
+      });
+    }
+
     var doc = new window.jspdf.jsPDF();
     if (typeof fileName === "undefined") {
       fileName = `${new Date().getTime()}.pdf`;
@@ -956,6 +1151,27 @@ function Annotation() {
                   : pages[0].getHeight() - 44,
             });
             button.setImage(emblemImage);
+          });
+        }
+        if (Object.keys(checktop) && Object.keys(checktop).length > 0) {
+          Object.keys(checktop).forEach((each) => {
+            const checkBox = form.createCheckBox(`check.${each}`);
+            checkBox.addToPage(pages[0], {
+              x:
+                checkleft[each] > 0
+                  ? checkleft[each] >= pages[0].getWidth()
+                    ? pages[0].getWidth() - 110
+                    : checkleft[each]
+                  : 0,
+              y:
+                checktop[each] > 0
+                  ? checktop[each] >= pages[0].getHeight()
+                    ? 0
+                    : pages[0].getHeight() - checktop[each]
+                  : pages[0].getHeight() - 44,
+              width: 25,
+              height: 25,
+            });
           });
         }
         // const pdfDataUri = await pdfDoc.saveAsBase64({ dataUri: true });
@@ -1112,6 +1328,26 @@ function Annotation() {
   function addImage(event) {
     event?.preventDefault();
     pdf.addImageToCanvas();
+  }
+  function saveFields(event) {
+    event?.preventDefault();
+    pdf.saveFields();
+  }
+  function addCheckBox(event) {
+    event?.preventDefault();
+    // pdf.addImageToCanvas();
+    pdf.setColor("rgba(255, 0, 0, 0.3)");
+    pdf.setBorderColor("blue");
+    let checkBoxId = Math.floor(Math.random() * 1000) + 1;
+    pdf.addCheckBox(checkBoxId);
+  }
+  function addradioBtn(event) {
+    event?.preventDefault();
+    pdf.setColor("rgba(255, 0, 0, 0.3)");
+    pdf.setBorderColor("blue");
+    let radioBoxId = Math.floor(Math.random() * 1000) + 1;
+    pdf.addradioBox(radioBoxId);
+    // pdf.addImageToCanvas();
   }
 
   function enableRectangle(event) {
@@ -1342,6 +1578,33 @@ function Annotation() {
               ></i>
             </button>
           </div>
+          <div className="tool">
+            <button className="tool-button">
+              <i
+                className="fa fa-check-circle-o"
+                title="Check box"
+                onClick={(e) => {
+                  // addImage(e);
+                  // handleClickOpen();
+                  addCheckBox();
+                }}
+              ></i>
+            </button>
+          </div>
+          {/* <div className="tool">
+            <button className="tool-button">
+              <i
+                className="fa fa-eyedropper"
+                title="radio box"
+                onClick={(e) => {
+                  // addImage(e);
+                  // handleClickOpen();
+                  addradioBtn();
+                }}
+              ></i>
+            </button>
+          </div> */}
+
           {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
