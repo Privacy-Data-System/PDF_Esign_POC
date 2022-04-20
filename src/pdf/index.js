@@ -420,11 +420,11 @@ function Annotation() {
         inst.fabricObjects.forEach((signfabricObjs, i) => {
           console.log(signfabricObjs, "signfabricObjs");
           let ctx = signfabricObjs.getContext("2d");
-          let placeHolder = "Cashapona";
+          let placeHolder = "Sendit Certified";
           let tCtx = document.createElement("canvas").getContext("2d");
           tCtx.canvas.width =
             tCtx.measureText(placeHolder).width + 100 * placeHolder.length;
-          tCtx.font = "bold 100px verdana, sans-serif";
+          tCtx.font = "bold 70px verdana, sans-serif";
           tCtx.fillStyle = "#ff0000";
           tCtx.fillText(placeHolder, 0, 100);
           var img = document.getElementById("watermark");
