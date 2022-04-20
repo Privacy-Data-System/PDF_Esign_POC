@@ -134,7 +134,7 @@ function Annotation() {
       ctx.globalAlpha = 0.2;
       ctx.fillStyle = pattern;
       // ctx.translate(0, signfabricObjs.height / 1.7);
-      ctx.translate(-325, signfabricObjs.height / 2 + 60);
+      ctx.translate(-400, signfabricObjs.height / 2 + 60);
       ctx.fillRect(0, 0, signfabricObjs.width, signfabricObjs.height);
       ctx.restore();
     }
@@ -1392,22 +1392,22 @@ function Annotation() {
               e-Signature
             </button>
           </div> */}
-          <div className="tool">
+          {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => addWaterMark(e)}
             >
               Add Water Mark
             </button>
-          </div>
-          <div className="tool">
+          </div> */}
+          {/* <div className="tool">
             <button
               className="btn btn-info btn-sm"
               onClick={(e) => removeWaterMark(e)}
             >
               Remove Water Mark
-            </button>
-          </div>
+            </button> 
+           </div> */}
           <div className="tool">
             <button
               className="btn btn-light btn-sm"
