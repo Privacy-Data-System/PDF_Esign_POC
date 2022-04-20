@@ -279,7 +279,12 @@ function Annotation() {
     return Arrow;
   })();
 
-  let PDFAnnotate = function (container_id, Url, options = {}) {
+  let PDFAnnotate = function (
+    container_id,
+    Url,
+    options = {},
+    showWatermark = false
+  ) {
     console.count("count PDF annote function");
     this.number_of_pages = 0;
     this.pages_rendered = 0;
@@ -404,28 +409,30 @@ function Annotation() {
       console.log(inst.fabricObjects, "inst");
 
       /// for water mark
-      inst.fabricObjects.forEach((signfabricObjs, i) => {
-        console.log(signfabricObjs, "signfabricObjs");
-        let ctx = signfabricObjs.getContext("2d");
-        let placeHolder = "Cashapona";
-        let tCtx = document.createElement("canvas").getContext("2d");
-        tCtx.canvas.width =
-          tCtx.measureText(placeHolder).width + 100 * placeHolder.length;
-        tCtx.font = "bold 100px verdana, sans-serif";
-        tCtx.fillStyle = "#ff0000";
-        tCtx.fillText(placeHolder, 0, 100);
-        var img = document.getElementById("watermark");
-        img.src = tCtx.canvas.toDataURL();
-        setTimeout(() => {
-          createWaterMark(ctx, img, signfabricObjs);
-          createWaterMark(ctx, img, signfabricObjs);
-          signfabricObjs.on("after:render", (e) => {
-            let { ctx } = e;
+      if (showWatermark) {
+        inst.fabricObjects.forEach((signfabricObjs, i) => {
+          console.log(signfabricObjs, "signfabricObjs");
+          let ctx = signfabricObjs.getContext("2d");
+          let placeHolder = "Cashapona";
+          let tCtx = document.createElement("canvas").getContext("2d");
+          tCtx.canvas.width =
+            tCtx.measureText(placeHolder).width + 100 * placeHolder.length;
+          tCtx.font = "bold 100px verdana, sans-serif";
+          tCtx.fillStyle = "#ff0000";
+          tCtx.fillText(placeHolder, 0, 100);
+          var img = document.getElementById("watermark");
+          img.src = tCtx.canvas.toDataURL();
+          setTimeout(() => {
             createWaterMark(ctx, img, signfabricObjs);
             createWaterMark(ctx, img, signfabricObjs);
-          });
-        }, 5000);
-      });
+            signfabricObjs.on("after:render", (e) => {
+              let { ctx } = e;
+              createWaterMark(ctx, img, signfabricObjs);
+              createWaterMark(ctx, img, signfabricObjs);
+            });
+          }, 5000);
+        });
+      }
     };
     // console.log(inst, "inst");
     inst.fabricClickHandler = function (event, fabricObj) {
@@ -948,7 +955,6 @@ function Annotation() {
                   ? pages[0].getHeight() - top[each]
                   : pages[0].getHeight() - 44,
             });
-
             button.setImage(emblemImage);
           });
         }
@@ -1038,16 +1044,21 @@ function Annotation() {
 
   // pdf = !pdf
   if (!pdf) {
-    pdf = new PDFAnnotate("pdf-container", pdfUrl, {
-      onPageUpdated(page, oldData, newData) {
-        // console.log(page, oldData, newData);
+    pdf = new PDFAnnotate(
+      "pdf-container",
+      pdfUrl,
+      {
+        onPageUpdated(page, oldData, newData) {
+          // console.log(page, oldData, newData);
+        },
+        ready() {
+          // console.log("Plugin initialized successfully");
+        },
+        scale: 1.1,
+        pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
       },
-      ready() {
-        // console.log("Plugin initialized successfully");
-      },
-      scale: 1.1,
-      pageImageCompression: "SLOW", // FAST, MEDIUM, SLOW(Helps to control the new PDF file size)
-    });
+      true
+    );
   }
   // console.log(pdf, "pdfco");
 
